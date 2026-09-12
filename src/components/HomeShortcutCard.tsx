@@ -1,5 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 
 import { colors } from '../constants/theme';
 
@@ -16,35 +23,99 @@ export function HomeShortcutCard({
   onPress,
   variant = 'default',
 }: HomeShortcutCardProps) {
+  const { width } = useWindowDimensions();
+
+  const isUltraCompact = width < 350;
+  const isCompact = width < 390;
+  const isLarge = width >= 768;
+
   const isEmergency = variant === 'emergency';
+
+  const cardWidth = isUltraCompact
+    ? '48%'
+    : '31.5%';
+
+  const cardMinHeight = isCompact
+    ? 112
+    : isLarge
+      ? 145
+      : 128;
+
+  const iconContainerSize = isCompact
+    ? 52
+    : isLarge
+      ? 66
+      : 60;
+
+  const iconSize = isCompact
+    ? 28
+    : isLarge
+      ? 36
+      : 32;
+
+  const titleSize = isCompact
+    ? 13
+    : isLarge
+      ? 16
+      : 14;
 
   return (
     <Pressable
       style={({ pressed }) => [
         styles.card,
-        isEmergency && styles.emergencyCard,
-        pressed && styles.cardPressed,
+
+        {
+          width: cardWidth,
+          minHeight: cardMinHeight,
+        },
+
+        isEmergency &&
+          styles.emergencyCard,
+
+        pressed &&
+          styles.cardPressed,
       ]}
       onPress={onPress}
     >
       <View
         style={[
           styles.iconContainer,
-          isEmergency && styles.emergencyIconContainer,
+
+          {
+            width: iconContainerSize,
+            height: iconContainerSize,
+            borderRadius:
+              iconContainerSize / 2,
+          },
+
+          isEmergency &&
+            styles.emergencyIconContainer,
         ]}
       >
         <Ionicons
           name={icon}
-          size={38}
-          color={isEmergency ? colors.white : colors.primary}
+          size={iconSize}
+          color={
+            isEmergency
+              ? colors.white
+              : colors.primary
+          }
         />
       </View>
 
       <Text
         style={[
           styles.title,
-          isEmergency && styles.emergencyTitle,
+
+          {
+            fontSize: titleSize,
+            lineHeight: titleSize + 5,
+          },
+
+          isEmergency &&
+            styles.emergencyTitle,
         ]}
+        numberOfLines={2}
       >
         {title}
       </Text>
@@ -54,26 +125,27 @@ export function HomeShortcutCard({
 
 const styles = StyleSheet.create({
   card: {
-    width: '30%',
-    aspectRatio: 0.88,
-
     backgroundColor: '#E8C8CA',
 
-    borderRadius: 22,
-    borderWidth: 2,
+    borderRadius: 20,
+
+    borderWidth: 1.5,
     borderColor: '#EADBDD',
 
     alignItems: 'center',
     justifyContent: 'center',
 
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 12,
 
     shadowColor: '#000',
+
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.08,
+
+    shadowOpacity: 0.07,
     shadowRadius: 3,
 
     elevation: 2,
@@ -85,7 +157,8 @@ const styles = StyleSheet.create({
   },
 
   cardPressed: {
-    opacity: 0.7,
+    opacity: 0.75,
+
     transform: [
       {
         scale: 0.97,
@@ -94,28 +167,21 @@ const styles = StyleSheet.create({
   },
 
   iconContainer: {
-    width: 72,
-    height: 72,
-
-    borderRadius: 36,
-
     backgroundColor: '#D79BAD',
 
     alignItems: 'center',
     justifyContent: 'center',
 
-    marginBottom: 12,
+    marginBottom: 9,
   },
 
   emergencyIconContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor:
+      'rgba(255, 255, 255, 0.18)',
   },
 
   title: {
     color: colors.primary,
-
-    fontSize: 16,
-    lineHeight: 20,
 
     fontWeight: '700',
 

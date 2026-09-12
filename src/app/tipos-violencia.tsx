@@ -10,81 +10,227 @@ import {
 } from 'react-native';
 
 import { colors } from '../constants/theme';
-import { tiposViolencia } from '../data/tiposViolencia';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+
+const tipos = [
+  {
+    titulo: 'Violência Física',
+    descricao:
+      'Agressões que causam ou podem causar danos ao corpo ou à saúde.',
+    icone: 'hand-left-outline',
+  },
+  {
+    titulo: 'Violência Psicológica',
+    descricao:
+      'Ameaças, humilhações, controle, isolamento e outras formas de dano emocional.',
+    icone: 'chatbubble-ellipses-outline',
+  },
+  {
+    titulo: 'Violência Sexual',
+    descricao:
+      'Condutas que constrangem ou forçam atos ou situações de natureza sexual.',
+    icone: 'body-outline',
+  },
+  {
+    titulo: 'Violência Patrimonial',
+    descricao:
+      'Controle, retenção, destruição ou subtração de dinheiro, bens e documentos.',
+    icone: 'wallet-outline',
+  },
+  {
+    titulo: 'Violência Moral',
+    descricao:
+      'Ofensas, acusações, difamação e outras ações que atingem a honra.',
+    icone: 'megaphone-outline',
+  },
+  {
+    titulo: 'Violência Vicária',
+    descricao:
+      'Uso de filhos, familiares ou vínculos afetivos como forma de causar sofrimento e controle.',
+    icone: 'people-outline',
+  },
+];
 
 export default function TiposViolenciaScreen() {
+  const {
+    isCompactPhone,
+    isPhone,
+    horizontalPadding,
+    topPadding,
+    contentMaxWidth,
+  } = useResponsiveLayout();
+
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: topPadding,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
+        <View
+          style={[
+            styles.content,
+            {
+              maxWidth: contentMaxWidth,
+              paddingHorizontal:
+                horizontalPadding,
+            },
+          ]}
         >
-          <Ionicons
-            name="chevron-back"
-            size={28}
-            color={colors.primary}
-          />
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={26}
+              color={colors.primary}
+            />
 
-          <Text style={styles.backText}>
-            Voltar
+            <Text style={styles.backText}>
+              Voltar
+            </Text>
+          </Pressable>
+
+          <Text
+            style={[
+              styles.title,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 30
+                    : 36,
+              },
+            ]}
+          >
+            Tipos de violência
           </Text>
-        </Pressable>
 
-        <Text style={styles.title}>
-          Tipos de violência
-        </Text>
-
-        <Text style={styles.subtitle}>
-          A violência pode acontecer de diferentes formas.
-          Conhecer os sinais é um passo importante para buscar ajuda.
-        </Text>
-
-        <View style={styles.list}>
-          {tiposViolencia.map((tipo) => (
-            <View
-              key={tipo.id}
-              style={[
-                styles.card,
-                {
-                  backgroundColor: tipo.cor,
-                },
-              ]}
-            >
-              <View style={styles.iconContainer}>
-                <Ionicons
-                  name={tipo.icone}
-                  size={42}
-                  color={colors.primary}
-                />
-              </View>
-
-              <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>
-                  {tipo.titulo}
-                </Text>
-
-                <Text style={styles.cardDescription}>
-                  {tipo.descricao}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.infoBox}>
-          <Ionicons
-            name="information-circle-outline"
-            size={26}
-            color={colors.primary}
-          />
-
-          <Text style={styles.infoText}>
-            Você não precisa identificar sozinha qual tipo de violência está vivendo para buscar ajuda.
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 15
+                    : 18,
+              },
+            ]}
+          >
+            A violência doméstica pode acontecer
+            de diferentes formas. Conhecer esses
+            sinais pode ajudar a identificar uma
+            situação de risco.
           </Text>
+
+          <View style={styles.cards}>
+            {tipos.map((tipo) => (
+              <View
+                key={tipo.titulo}
+                style={[
+                  styles.card,
+                  {
+                    width:
+                      isPhone
+                        ? '100%'
+                        : '48.5%',
+
+                    padding:
+                      isCompactPhone
+                        ? 15
+                        : 18,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.iconContainer,
+                    {
+                      width:
+                        isCompactPhone
+                          ? 52
+                          : 62,
+
+                      height:
+                        isCompactPhone
+                          ? 52
+                          : 62,
+
+                      borderRadius:
+                        isCompactPhone
+                          ? 26
+                          : 31,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={tipo.icone as any}
+                    size={
+                      isCompactPhone
+                        ? 27
+                        : 32
+                    }
+                    color={colors.primary}
+                  />
+                </View>
+
+                <View style={styles.cardContent}>
+                  <Text
+                    style={[
+                      styles.cardTitle,
+                      {
+                        fontSize:
+                          isCompactPhone
+                            ? 17
+                            : 19,
+                      },
+                    ]}
+                  >
+                    {tipo.titulo}
+                  </Text>
+
+                  <Text style={styles.cardText}>
+                    {tipo.descricao}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.infoBox}>
+            <Ionicons
+              name="information-circle-outline"
+              size={26}
+              color={colors.primary}
+            />
+
+            <Text style={styles.infoText}>
+              Você não precisa identificar sozinha
+              qual tipo de violência está vivendo
+              para buscar ajuda ou orientação.
+            </Text>
+          </View>
+
+          <Pressable
+            style={styles.helpButton}
+            onPress={() =>
+              router.push('/denunciar')
+            }
+          >
+            <Text style={styles.helpButtonText}>
+              Ver canais de ajuda
+            </Text>
+
+            <Ionicons
+              name="arrow-forward"
+              size={21}
+              color={colors.white}
+            />
+          </Pressable>
         </View>
       </ScrollView>
     </View>
@@ -97,65 +243,80 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
+  scrollContent: {
+    alignItems: 'center',
+
+    paddingBottom: 60,
+  },
+
   content: {
-    paddingHorizontal: 26,
-    paddingTop: 45,
-    paddingBottom: 50,
+    width: '100%',
   },
 
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 30,
+
     alignSelf: 'flex-start',
+
+    marginBottom: 28,
   },
 
   backText: {
     color: colors.primary,
-    fontSize: 17,
+
+    fontSize: 16,
     fontWeight: '600',
   },
 
   title: {
     color: colors.primary,
-    fontSize: 36,
+
     fontWeight: '700',
-    marginBottom: 14,
+
+    marginBottom: 10,
   },
 
   subtitle: {
     color: colors.text,
-    fontSize: 18,
-    lineHeight: 27,
-    marginBottom: 30,
+
+    lineHeight: 26,
+
+    maxWidth: 650,
+
+    marginBottom: 28,
   },
 
-  list: {
-    gap: 18,
+  cards: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+
+    justifyContent: 'space-between',
+
+    gap: 14,
   },
 
   card: {
-    minHeight: 150,
-    borderRadius: 24,
+    minHeight: 130,
 
-    padding: 18,
+    backgroundColor: colors.white,
+
+    borderWidth: 1,
+    borderColor: '#E4DADC',
+
+    borderRadius: 22,
 
     flexDirection: 'row',
     alignItems: 'center',
   },
 
   iconContainer: {
-    width: 92,
-    height: 92,
-
-    borderRadius: 46,
-
-    backgroundColor: '#F0D8CA',
+    backgroundColor: colors.lightPink,
 
     alignItems: 'center',
     justifyContent: 'center',
 
-    marginRight: 18,
+    marginRight: 14,
   },
 
   cardContent: {
@@ -165,33 +326,32 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: colors.primary,
 
-    fontSize: 22,
     fontWeight: '700',
 
-    marginBottom: 7,
+    marginBottom: 5,
   },
 
-  cardDescription: {
-    color: colors.white,
+  cardText: {
+    color: colors.text,
 
-    fontSize: 17,
-    lineHeight: 24,
+    fontSize: 14,
+    lineHeight: 20,
   },
 
   infoBox: {
-    marginTop: 30,
+    marginTop: 24,
 
     borderWidth: 1.5,
     borderColor: colors.pink,
 
     borderRadius: 20,
 
-    padding: 18,
+    padding: 17,
 
     flexDirection: 'row',
     alignItems: 'flex-start',
 
-    gap: 12,
+    gap: 11,
   },
 
   infoText: {
@@ -199,7 +359,32 @@ const styles = StyleSheet.create({
 
     color: colors.text,
 
+    fontSize: 14,
+    lineHeight: 21,
+  },
+
+  helpButton: {
+    minHeight: 60,
+
+    marginTop: 24,
+
+    backgroundColor: colors.primary,
+
+    borderRadius: 30,
+
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    gap: 9,
+
+    paddingHorizontal: 22,
+  },
+
+  helpButtonText: {
+    color: colors.white,
+
     fontSize: 16,
-    lineHeight: 23,
+    fontWeight: '700',
   },
 });

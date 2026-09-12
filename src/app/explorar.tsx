@@ -10,169 +10,279 @@ import {
   View,
 } from 'react-native';
 
-import { useMemo, useState } from 'react';
+import {
+  useMemo,
+  useState,
+} from 'react';
 
 import { colors } from '../constants/theme';
 import { conteudos } from '../data/conteudos';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 export default function ExplorarScreen() {
-  const [busca, setBusca] = useState('');
+  const [busca, setBusca] =
+    useState('');
+
+  const {
+    isCompactPhone,
+    isPhone,
+    horizontalPadding,
+    topPadding,
+    contentMaxWidth,
+  } = useResponsiveLayout();
 
   const resultados = useMemo(() => {
-    const termo = busca.toLowerCase().trim();
+    const termo =
+      busca.toLowerCase().trim();
 
     if (!termo) {
       return conteudos;
     }
 
-    return conteudos.filter((conteudo) =>
-      conteudo.titulo.toLowerCase().includes(termo) ||
-      conteudo.resumo.toLowerCase().includes(termo) ||
-      conteudo.categoria.toLowerCase().includes(termo)
+    return conteudos.filter(
+      (conteudo) =>
+        conteudo.titulo
+          .toLowerCase()
+          .includes(termo) ||
+        conteudo.resumo
+          .toLowerCase()
+          .includes(termo) ||
+        conteudo.categoria
+          .toLowerCase()
+          .includes(termo)
     );
   }, [busca]);
 
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: topPadding,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
+        <View
+          style={[
+            styles.content,
+            {
+              maxWidth: contentMaxWidth,
+              paddingHorizontal:
+                horizontalPadding,
+            },
+          ]}
         >
-          <Ionicons
-            name="chevron-back"
-            size={28}
-            color={colors.primary}
-          />
-
-          <Text style={styles.backText}>
-            Voltar
-          </Text>
-        </Pressable>
-
-        <Text style={styles.title}>
-          Explorar
-        </Text>
-
-        <Text style={styles.subtitle}>
-          Informação também é uma forma de proteção.
-          Encontre orientações de forma simples e direta.
-        </Text>
-
-        <View style={styles.searchContainer}>
-          <Ionicons
-            name="search-outline"
-            size={23}
-            color="#81777E"
-          />
-
-          <TextInput
-            style={styles.searchInput}
-            value={busca}
-            onChangeText={setBusca}
-            placeholder="Buscar assunto"
-            placeholderTextColor="#918991"
-          />
-
-          {busca.length > 0 && (
-            <Pressable onPress={() => setBusca('')}>
-              <Ionicons
-                name="close-circle"
-                size={22}
-                color="#918991"
-              />
-            </Pressable>
-          )}
-        </View>
-
-        <Text style={styles.sectionTitle}>
-          Informações importantes
-        </Text>
-
-        <View style={styles.list}>
-          {resultados.map((conteudo) => (
-            <Pressable
-              key={conteudo.id}
-              style={({ pressed }) => [
-                styles.card,
-                pressed && styles.cardPressed,
-              ]}
-              onPress={() =>
-                router.push(`/conteudo/${conteudo.id}` as any)
-              }
-            >
-              <View style={styles.iconContainer}>
-                <Ionicons
-                  name={conteudo.icone}
-                  size={31}
-                  color={colors.primary}
-                />
-              </View>
-
-              <View style={styles.cardContent}>
-                <Text style={styles.category}>
-                  {conteudo.categoria}
-                </Text>
-
-                <Text style={styles.cardTitle}>
-                  {conteudo.titulo}
-                </Text>
-
-                <Text style={styles.cardDescription}>
-                  {conteudo.resumo}
-                </Text>
-              </View>
-
-              <Ionicons
-                name="chevron-forward"
-                size={25}
-                color={colors.primary}
-              />
-            </Pressable>
-          ))}
-        </View>
-
-        {resultados.length === 0 && (
-          <View style={styles.emptyContainer}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons
-              name="search-outline"
-              size={48}
-              color={colors.pink}
+              name="chevron-back"
+              size={26}
+              color={colors.primary}
             />
 
-            <Text style={styles.emptyTitle}>
-              Nenhum conteúdo encontrado
+            <Text style={styles.backText}>
+              Voltar
             </Text>
+          </Pressable>
 
-            <Text style={styles.emptyDescription}>
-              Tente buscar por outro termo.
-            </Text>
+          <Text
+            style={[
+              styles.title,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 30
+                    : 36,
+              },
+            ]}
+          >
+            Explorar
+          </Text>
+
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 15
+                    : 18,
+              },
+            ]}
+          >
+            Informação também é uma forma de
+            proteção. Encontre orientações de
+            forma simples e direta.
+          </Text>
+
+          <View style={styles.searchContainer}>
+            <Ionicons
+              name="search-outline"
+              size={22}
+              color="#81777E"
+            />
+
+            <TextInput
+              style={styles.searchInput}
+              value={busca}
+              onChangeText={setBusca}
+              placeholder="Buscar assunto"
+              placeholderTextColor="#918991"
+            />
+
+            {busca.length > 0 && (
+              <Pressable
+                onPress={() =>
+                  setBusca('')
+                }
+              >
+                <Ionicons
+                  name="close-circle"
+                  size={21}
+                  color="#918991"
+                />
+              </Pressable>
+            )}
           </View>
-        )}
 
-        <Pressable
-          style={styles.helpCard}
-          onPress={() => router.push('/denunciar')}
-        >
-          <View>
-            <Text style={styles.helpTitle}>
-              Precisa de ajuda agora?
-            </Text>
+          <Text style={styles.sectionTitle}>
+            Informações importantes
+          </Text>
 
-            <Text style={styles.helpDescription}>
-              Veja os canais oficiais disponíveis.
-            </Text>
+          <View style={styles.list}>
+            {resultados.map(
+              (conteudo) => (
+                <Pressable
+                  key={conteudo.id}
+                  style={({ pressed }) => [
+                    styles.card,
+                    {
+                      width:
+                        isPhone
+                          ? '100%'
+                          : '48.5%',
+                    },
+
+                    pressed &&
+                      styles.cardPressed,
+                  ]}
+                  onPress={() =>
+                    router.push(
+                      `/conteudo/${conteudo.id}` as any
+                    )
+                  }
+                >
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      {
+                        width:
+                          isCompactPhone
+                            ? 52
+                            : 60,
+
+                        height:
+                          isCompactPhone
+                            ? 52
+                            : 60,
+
+                        borderRadius:
+                          isCompactPhone
+                            ? 26
+                            : 30,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={conteudo.icone}
+                      size={
+                        isCompactPhone
+                          ? 27
+                          : 30
+                      }
+                      color={colors.primary}
+                    />
+                  </View>
+
+                  <View style={styles.cardContent}>
+                    <Text style={styles.category}>
+                      {conteudo.categoria}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.cardTitle,
+                        {
+                          fontSize:
+                            isCompactPhone
+                              ? 17
+                              : 18,
+                        },
+                      ]}
+                    >
+                      {conteudo.titulo}
+                    </Text>
+
+                    <Text style={styles.cardDescription}>
+                      {conteudo.resumo}
+                    </Text>
+                  </View>
+
+                  <Ionicons
+                    name="chevron-forward"
+                    size={22}
+                    color={colors.primary}
+                  />
+                </Pressable>
+              )
+            )}
           </View>
 
-          <Ionicons
-            name="arrow-forward-circle"
-            size={38}
-            color={colors.white}
-          />
-        </Pressable>
+          {resultados.length === 0 && (
+            <View style={styles.emptyContainer}>
+              <Ionicons
+                name="search-outline"
+                size={44}
+                color={colors.pink}
+              />
+
+              <Text style={styles.emptyTitle}>
+                Nenhum conteúdo encontrado
+              </Text>
+
+              <Text style={styles.emptyDescription}>
+                Tente buscar por outro termo.
+              </Text>
+            </View>
+          )}
+
+          <Pressable
+            style={styles.helpCard}
+            onPress={() =>
+              router.push('/denunciar')
+            }
+          >
+            <View style={styles.helpContent}>
+              <Text style={styles.helpTitle}>
+                Precisa de ajuda agora?
+              </Text>
+
+              <Text style={styles.helpDescription}>
+                Veja os canais oficiais disponíveis.
+              </Text>
+            </View>
+
+            <Ionicons
+              name="arrow-forward-circle"
+              size={34}
+              color={colors.white}
+            />
+          </Pressable>
+        </View>
       </ScrollView>
     </View>
   );
@@ -181,64 +291,75 @@ export default function ExplorarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+
     backgroundColor: colors.background,
   },
 
-  content: {
-    paddingHorizontal: 26,
-    paddingTop: 45,
+  scrollContent: {
+    alignItems: 'center',
     paddingBottom: 60,
+  },
+
+  content: {
+    width: '100%',
   },
 
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
+
     alignSelf: 'flex-start',
-    marginBottom: 30,
+
+    marginBottom: 28,
   },
 
   backText: {
     color: colors.primary,
-    fontSize: 17,
+
+    fontSize: 16,
     fontWeight: '600',
   },
 
   title: {
     color: colors.primary,
-    fontSize: 36,
+
     fontWeight: '700',
-    marginBottom: 12,
+
+    marginBottom: 10,
   },
 
   subtitle: {
     color: colors.text,
-    fontSize: 18,
-    lineHeight: 27,
-    marginBottom: 26,
+
+    lineHeight: 26,
+
+    maxWidth: 650,
+
+    marginBottom: 24,
   },
 
   searchContainer: {
-    height: 58,
+    minHeight: 55,
 
     backgroundColor: colors.white,
 
     borderWidth: 1.5,
     borderColor: '#D8CFD1',
 
-    borderRadius: 20,
+    borderRadius: 18,
 
-    paddingHorizontal: 16,
+    paddingHorizontal: 15,
 
     flexDirection: 'row',
     alignItems: 'center',
 
-    marginBottom: 32,
+    marginBottom: 26,
   },
 
   searchInput: {
     flex: 1,
 
-    marginLeft: 10,
+    marginLeft: 9,
 
     color: colors.text,
 
@@ -248,27 +369,32 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: colors.primary,
 
-    fontSize: 23,
+    fontSize: 22,
     fontWeight: '700',
 
-    marginBottom: 16,
+    marginBottom: 15,
   },
 
   list: {
-    gap: 15,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+
+    justifyContent: 'space-between',
+
+    gap: 14,
   },
 
   card: {
-    minHeight: 125,
+    minHeight: 130,
 
     backgroundColor: colors.white,
 
-    borderRadius: 23,
+    borderRadius: 22,
 
     borderWidth: 1,
     borderColor: '#E5DDDF',
 
-    padding: 17,
+    padding: 15,
 
     flexDirection: 'row',
     alignItems: 'center',
@@ -276,25 +402,15 @@ const styles = StyleSheet.create({
 
   cardPressed: {
     opacity: 0.75,
-    transform: [
-      {
-        scale: 0.985,
-      },
-    ],
   },
 
   iconContainer: {
-    width: 64,
-    height: 64,
-
-    borderRadius: 32,
-
     backgroundColor: colors.lightPink,
 
     alignItems: 'center',
     justifyContent: 'center',
 
-    marginRight: 14,
+    marginRight: 12,
   },
 
   cardContent: {
@@ -304,82 +420,87 @@ const styles = StyleSheet.create({
   category: {
     color: colors.pink,
 
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '700',
 
     textTransform: 'uppercase',
 
-    marginBottom: 4,
+    marginBottom: 3,
   },
 
   cardTitle: {
     color: colors.primary,
 
-    fontSize: 18,
     fontWeight: '700',
 
-    marginBottom: 5,
+    marginBottom: 4,
   },
 
   cardDescription: {
     color: colors.text,
 
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 19,
   },
 
   emptyContainer: {
-    paddingVertical: 50,
-
     alignItems: 'center',
+
+    paddingVertical: 45,
   },
 
   emptyTitle: {
     color: colors.primary,
 
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '700',
 
-    marginTop: 15,
+    marginTop: 12,
   },
 
   emptyDescription: {
     color: colors.text,
 
-    fontSize: 15,
+    fontSize: 14,
 
-    marginTop: 6,
+    marginTop: 5,
   },
 
   helpCard: {
-    minHeight: 105,
+    minHeight: 95,
 
     backgroundColor: colors.primary,
 
-    borderRadius: 24,
+    borderRadius: 22,
 
-    paddingHorizontal: 22,
-    paddingVertical: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
 
-    marginTop: 30,
+    marginTop: 25,
 
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
 
+  helpContent: {
+    flex: 1,
+
+    paddingRight: 12,
+  },
+
   helpTitle: {
     color: colors.white,
 
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '700',
 
-    marginBottom: 5,
+    marginBottom: 4,
   },
 
   helpDescription: {
     color: '#F0E5EA',
 
-    fontSize: 14,
+    fontSize: 13,
   },
 });
