@@ -11,15 +11,28 @@ import {
   View,
 } from 'react-native';
 
-import { useMemo, useState } from 'react';
+import {
+  useMemo,
+  useState,
+} from 'react';
 
 import { colors } from '../constants/theme';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
-import {
-  ServicoApoio,
-  servicosApoio,
-  TipoServico,
-} from '../data/servicosApoio';
+type TipoServico =
+  | 'Todos'
+  | 'Delegacia'
+  | 'Defensoria'
+  | 'Centro de Apoio'
+  | 'Saúde';
+
+type Servico = {
+  nome: string;
+  tipo: Exclude<TipoServico, 'Todos'>;
+  localizacao: string;
+  horario: string;
+  telefone?: string;
+};
 
 const filtros: TipoServico[] = [
   'Todos',
@@ -29,276 +42,427 @@ const filtros: TipoServico[] = [
   'Saúde',
 ];
 
+const servicos: Servico[] = [
+  {
+    nome: 'Delegacia da Mulher - Unidade Centro',
+    tipo: 'Delegacia',
+    localizacao:
+      'Região central de São Paulo',
+    horario:
+      'Horário demonstrativo',
+  },
+  {
+    nome: 'Núcleo de Atendimento Jurídico',
+    tipo: 'Defensoria',
+    localizacao:
+      'São Paulo - SP',
+    horario:
+      'Horário demonstrativo',
+  },
+  {
+    nome: 'Centro de Referência da Mulher',
+    tipo: 'Centro de Apoio',
+    localizacao:
+      'São Paulo - SP',
+    horario:
+      'Horário demonstrativo',
+  },
+  {
+    nome: 'Unidade de Atendimento à Saúde',
+    tipo: 'Saúde',
+    localizacao:
+      'São Paulo - SP',
+    horario:
+      'Atendimento demonstrativo',
+  },
+  {
+    nome: 'Centro de Proteção e Acolhimento',
+    tipo: 'Centro de Apoio',
+    localizacao:
+      'São Paulo - SP',
+    horario:
+      'Horário demonstrativo',
+  },
+];
+
+function getIcon(
+  tipo: Servico['tipo']
+): keyof typeof Ionicons.glyphMap {
+  switch (tipo) {
+    case 'Delegacia':
+      return 'business-outline';
+
+    case 'Defensoria':
+      return 'scale-outline';
+
+    case 'Centro de Apoio':
+      return 'heart-outline';
+
+    case 'Saúde':
+      return 'medkit-outline';
+
+    default:
+      return 'location-outline';
+  }
+}
+
 export default function RedeApoioScreen() {
-  const [busca, setBusca] = useState('');
-  const [filtroSelecionado, setFiltroSelecionado] =
+  const [busca, setBusca] =
+    useState('');
+
+  const [filtro, setFiltro] =
     useState<TipoServico>('Todos');
 
-  const servicosFiltrados = useMemo(() => {
-    return servicosApoio.filter((servico) => {
-      const correspondeBusca =
-        servico.nome
-          .toLowerCase()
-          .includes(busca.toLowerCase()) ||
-        servico.endereco
-          .toLowerCase()
-          .includes(busca.toLowerCase()) ||
-        servico.cidade
-          .toLowerCase()
-          .includes(busca.toLowerCase());
+  const {
+    isCompactPhone,
+    isPhone,
+    horizontalPadding,
+    topPadding,
+    contentMaxWidth,
+  } = useResponsiveLayout();
 
-      const correspondeFiltro =
-        filtroSelecionado === 'Todos' ||
-        servico.tipo === filtroSelecionado;
+  const resultados = useMemo(() => {
+    const termo =
+      busca.trim().toLowerCase();
 
-      return correspondeBusca && correspondeFiltro;
-    });
-  }, [busca, filtroSelecionado]);
+    return servicos.filter(
+      (servico) => {
+        const correspondeFiltro =
+          filtro === 'Todos' ||
+          servico.tipo === filtro;
 
-  function getIcone(tipo: ServicoApoio['tipo']) {
-    switch (tipo) {
-      case 'Delegacia':
-        return 'shield-outline';
+        const correspondeBusca =
+          !termo ||
+          servico.nome
+            .toLowerCase()
+            .includes(termo) ||
+          servico.tipo
+            .toLowerCase()
+            .includes(termo) ||
+          servico.localizacao
+            .toLowerCase()
+            .includes(termo);
 
-      case 'Defensoria':
-        return 'document-text-outline';
-
-      case 'Saúde':
-        return 'medical-outline';
-
-      default:
-        return 'people-outline';
-    }
-  }
+        return (
+          correspondeFiltro &&
+          correspondeBusca
+        );
+      }
+    );
+  }, [busca, filtro]);
 
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: topPadding,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
+        <View
+          style={[
+            styles.content,
+            {
+              maxWidth: contentMaxWidth,
+              paddingHorizontal:
+                horizontalPadding,
+            },
+          ]}
         >
-          <Ionicons
-            name="chevron-back"
-            size={28}
-            color={colors.primary}
-          />
-
-          <Text style={styles.backText}>
-            Voltar
-          </Text>
-        </Pressable>
-
-        <Text style={styles.title}>
-          Rede de Apoio
-        </Text>
-
-        <Text style={styles.subtitle}>
-          Encontre serviços que podem oferecer orientação,
-          acolhimento e proteção.
-        </Text>
-
-        {/* Busca */}
-
-        <View style={styles.searchContainer}>
-          <Ionicons
-            name="search-outline"
-            size={23}
-            color="#7D737B"
-          />
-
-          <TextInput
-            value={busca}
-            onChangeText={setBusca}
-            placeholder="Buscar serviço ou região"
-            placeholderTextColor="#8F878D"
-            style={styles.searchInput}
-          />
-
-          {busca.length > 0 && (
-            <Pressable onPress={() => setBusca('')}>
-              <Ionicons
-                name="close-circle"
-                size={22}
-                color="#8F878D"
-              />
-            </Pressable>
-          )}
-        </View>
-
-        {/* Filtros */}
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filters}
-        >
-          {filtros.map((filtro) => {
-            const ativo = filtro === filtroSelecionado;
-
-            return (
-              <Pressable
-                key={filtro}
-                style={[
-                  styles.filterButton,
-                  ativo && styles.filterButtonActive,
-                ]}
-                onPress={() =>
-                  setFiltroSelecionado(filtro)
-                }
-              >
-                <Text
-                  style={[
-                    styles.filterText,
-                    ativo && styles.filterTextActive,
-                  ]}
-                >
-                  {filtro}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        <Text style={styles.resultCount}>
-          {servicosFiltrados.length}{' '}
-          {servicosFiltrados.length === 1
-            ? 'serviço encontrado'
-            : 'serviços encontrados'}
-        </Text>
-
-        {/* Serviços */}
-
-        <View style={styles.list}>
-          {servicosFiltrados.map((servico) => (
-            <View
-              key={servico.id}
-              style={styles.card}
-            >
-              <View style={styles.cardHeader}>
-                <View style={styles.iconContainer}>
-                  <Ionicons
-                    name={getIcone(servico.tipo)}
-                    size={30}
-                    color={colors.primary}
-                  />
-                </View>
-
-                <View style={styles.cardHeaderText}>
-                  <Text style={styles.serviceType}>
-                    {servico.tipo}
-                  </Text>
-
-                  <Text style={styles.serviceName}>
-                    {servico.nome}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.infoRow}>
-                <Ionicons
-                  name="location-outline"
-                  size={20}
-                  color={colors.primary}
-                />
-
-                <Text style={styles.infoText}>
-                  {servico.endereco} • {servico.cidade}
-                </Text>
-              </View>
-
-              {servico.horario && (
-                <View style={styles.infoRow}>
-                  <Ionicons
-                    name="time-outline"
-                    size={20}
-                    color={colors.primary}
-                  />
-
-                  <Text style={styles.infoText}>
-                    {servico.horario}
-                  </Text>
-                </View>
-              )}
-
-              <View style={styles.actions}>
-                <Pressable
-                  style={styles.secondaryButton}
-                  onPress={() => router.push('/mapa')}
-                >
-                  <Ionicons
-                    name="map-outline"
-                    size={20}
-                    color={colors.primary}
-                  />
-
-                  <Text style={styles.secondaryButtonText}>
-                    Ver no mapa
-                  </Text>
-                </Pressable>
-
-                {servico.telefone && (
-                  <Pressable
-                    style={styles.primaryButton}
-                    onPress={() =>
-                      Linking.openURL(
-                        `tel:${servico.telefone}`
-                      )
-                    }
-                  >
-                    <Ionicons
-                      name="call-outline"
-                      size={20}
-                      color={colors.white}
-                    />
-
-                    <Text style={styles.primaryButtonText}>
-                      Ligar
-                    </Text>
-                  </Pressable>
-                )}
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {servicosFiltrados.length === 0 && (
-          <View style={styles.emptyContainer}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons
-              name="search-outline"
-              size={48}
-              color={colors.pink}
+              name="chevron-back"
+              size={26}
+              color={colors.primary}
             />
 
-            <Text style={styles.emptyTitle}>
-              Nenhum serviço encontrado
+            <Text style={styles.backText}>
+              Voltar
             </Text>
+          </Pressable>
 
-            <Text style={styles.emptyDescription}>
-              Tente alterar a busca ou selecionar outro tipo
-              de atendimento.
+          <Text
+            style={[
+              styles.title,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 30
+                    : 36,
+              },
+            ]}
+          >
+            Rede de apoio
+          </Text>
+
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 15
+                    : 18,
+              },
+            ]}
+          >
+            Consulte serviços de orientação,
+            acolhimento, proteção e atendimento.
+          </Text>
+
+          <View style={styles.searchContainer}>
+            <Ionicons
+              name="search-outline"
+              size={22}
+              color="#80777D"
+            />
+
+            <TextInput
+              style={styles.searchInput}
+              value={busca}
+              onChangeText={setBusca}
+              placeholder="Buscar serviço"
+              placeholderTextColor="#918991"
+            />
+
+            {busca.length > 0 && (
+              <Pressable
+                onPress={() =>
+                  setBusca('')
+                }
+              >
+                <Ionicons
+                  name="close-circle"
+                  size={21}
+                  color="#918991"
+                />
+              </Pressable>
+            )}
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={
+              false
+            }
+            contentContainerStyle={
+              styles.filters
+            }
+          >
+            {filtros.map((item) => {
+              const ativo =
+                item === filtro;
+
+              return (
+                <Pressable
+                  key={item}
+                  style={[
+                    styles.filterButton,
+                    ativo &&
+                      styles.filterButtonActive,
+                  ]}
+                  onPress={() =>
+                    setFiltro(item)
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.filterText,
+                      ativo &&
+                        styles.filterTextActive,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          <Text style={styles.resultCount}>
+            {resultados.length}{' '}
+            {resultados.length === 1
+              ? 'serviço encontrado'
+              : 'serviços encontrados'}
+          </Text>
+
+          <View style={styles.cards}>
+            {resultados.map(
+              (servico) => (
+                <View
+                  key={servico.nome}
+                  style={[
+                    styles.card,
+                    {
+                      width:
+                        isPhone
+                          ? '100%'
+                          : '48.5%',
+                    },
+                  ]}
+                >
+                  <View style={styles.cardHeader}>
+                    <View
+                      style={[
+                        styles.iconContainer,
+                        {
+                          width:
+                            isCompactPhone
+                              ? 50
+                              : 58,
+
+                          height:
+                            isCompactPhone
+                              ? 50
+                              : 58,
+
+                          borderRadius:
+                            isCompactPhone
+                              ? 25
+                              : 29,
+                        },
+                      ]}
+                    >
+                      <Ionicons
+                        name={getIcon(
+                          servico.tipo
+                        )}
+                        size={
+                          isCompactPhone
+                            ? 26
+                            : 30
+                        }
+                        color={colors.primary}
+                      />
+                    </View>
+
+                    <View style={styles.headerText}>
+                      <Text style={styles.serviceType}>
+                        {servico.tipo}
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.serviceName,
+                          {
+                            fontSize:
+                              isCompactPhone
+                                ? 17
+                                : 19,
+                          },
+                        ]}
+                      >
+                        {servico.nome}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.infoRow}>
+                    <Ionicons
+                      name="location-outline"
+                      size={19}
+                      color={colors.primary}
+                    />
+
+                    <Text style={styles.infoText}>
+                      {servico.localizacao}
+                    </Text>
+                  </View>
+
+                  <View style={styles.infoRow}>
+                    <Ionicons
+                      name="time-outline"
+                      size={19}
+                      color={colors.primary}
+                    />
+
+                    <Text style={styles.infoText}>
+                      {servico.horario}
+                    </Text>
+                  </View>
+
+                  <View style={styles.actions}>
+                    <Pressable
+                      style={styles.mapButton}
+                      onPress={() =>
+                        router.push('/mapa')
+                      }
+                    >
+                      <Ionicons
+                        name="map-outline"
+                        size={18}
+                        color={colors.primary}
+                      />
+
+                      <Text style={styles.mapButtonText}>
+                        Ver no mapa
+                      </Text>
+                    </Pressable>
+
+                    {servico.telefone && (
+                      <Pressable
+                        style={styles.callButton}
+                        onPress={() =>
+                          Linking.openURL(
+                            `tel:${servico.telefone}`
+                          )
+                        }
+                      >
+                        <Ionicons
+                          name="call-outline"
+                          size={18}
+                          color={colors.white}
+                        />
+
+                        <Text style={styles.callButtonText}>
+                          Ligar
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
+                </View>
+              )
+            )}
+          </View>
+
+          {resultados.length === 0 && (
+            <View style={styles.empty}>
+              <Ionicons
+                name="search-outline"
+                size={42}
+                color={colors.pink}
+              />
+
+              <Text style={styles.emptyTitle}>
+                Nenhum serviço encontrado
+              </Text>
+
+              <Text style={styles.emptyText}>
+                Tente outro termo ou filtro.
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.demoNotice}>
+            <Ionicons
+              name="information-circle-outline"
+              size={25}
+              color={colors.primary}
+            />
+
+            <Text style={styles.demoText}>
+              Os serviços exibidos nesta versão
+              são demonstrativos. Uma versão futura
+              poderá utilizar dados oficiais
+              atualizados da rede de atendimento.
             </Text>
           </View>
-        )}
-
-        {/* Aviso MVP */}
-
-        <View style={styles.infoBox}>
-          <Ionicons
-            name="information-circle-outline"
-            size={25}
-            color={colors.primary}
-          />
-
-          <Text style={styles.infoBoxText}>
-            Os serviços exibidos nesta versão são dados de
-            demonstração do MVP. A versão final do protótipo
-            poderá utilizar informações oficiais da rede de
-            atendimento.
-          </Text>
         </View>
       </ScrollView>
     </View>
@@ -311,53 +475,63 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  content: {
-    paddingHorizontal: 26,
-    paddingTop: 45,
+  scrollContent: {
+    alignItems: 'center',
     paddingBottom: 60,
+  },
+
+  content: {
+    width: '100%',
   },
 
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
+
     alignSelf: 'flex-start',
-    marginBottom: 30,
+
+    marginBottom: 28,
   },
 
   backText: {
     color: colors.primary,
-    fontSize: 17,
+
+    fontSize: 16,
     fontWeight: '600',
   },
 
   title: {
     color: colors.primary,
-    fontSize: 36,
+
     fontWeight: '700',
-    marginBottom: 12,
+
+    marginBottom: 10,
   },
 
   subtitle: {
     color: colors.text,
-    fontSize: 18,
-    lineHeight: 27,
-    marginBottom: 28,
+
+    lineHeight: 26,
+
+    maxWidth: 650,
+
+    marginBottom: 24,
   },
 
   searchContainer: {
-    height: 58,
+    minHeight: 55,
 
     backgroundColor: colors.white,
 
     borderWidth: 1.5,
-    borderColor: '#D6CDCF',
+    borderColor: '#D8CFD1',
 
-    borderRadius: 20,
+    borderRadius: 18,
+
+    paddingHorizontal: 15,
 
     flexDirection: 'row',
     alignItems: 'center',
-
-    paddingHorizontal: 16,
 
     marginBottom: 18,
   },
@@ -365,7 +539,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
 
-    marginLeft: 10,
+    marginLeft: 9,
 
     color: colors.text,
 
@@ -373,18 +547,25 @@ const styles = StyleSheet.create({
   },
 
   filters: {
-    gap: 10,
-    paddingBottom: 10,
+    gap: 9,
+
+    paddingBottom: 4,
   },
 
   filterButton: {
-    borderWidth: 1.5,
-    borderColor: colors.pink,
+    minHeight: 40,
 
-    borderRadius: 22,
+    paddingHorizontal: 15,
 
-    paddingHorizontal: 17,
-    paddingVertical: 10,
+    borderRadius: 20,
+
+    borderWidth: 1,
+    borderColor: '#D6C9CD',
+
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    backgroundColor: colors.white,
   },
 
   filterButtonActive: {
@@ -394,7 +575,8 @@ const styles = StyleSheet.create({
 
   filterText: {
     color: colors.primary,
-    fontSize: 14,
+
+    fontSize: 13,
     fontWeight: '600',
   },
 
@@ -403,65 +585,60 @@ const styles = StyleSheet.create({
   },
 
   resultCount: {
-    color: '#777075',
-    fontSize: 14,
-    marginTop: 12,
-    marginBottom: 16,
+    color: '#756B72',
+
+    fontSize: 13,
+
+    marginVertical: 18,
   },
 
-  list: {
-    gap: 18,
+  cards: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+
+    justifyContent: 'space-between',
+
+    gap: 14,
   },
 
   card: {
+    minHeight: 230,
+
     backgroundColor: colors.white,
 
-    borderRadius: 24,
-
-    padding: 20,
-
     borderWidth: 1,
-    borderColor: '#E5DDDE',
+    borderColor: '#E4DADC',
 
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    borderRadius: 22,
 
-    elevation: 2,
+    padding: 17,
   },
 
   cardHeader: {
     flexDirection: 'row',
+
     alignItems: 'center',
-    marginBottom: 17,
+
+    marginBottom: 15,
   },
 
   iconContainer: {
-    width: 58,
-    height: 58,
-
-    borderRadius: 29,
-
     backgroundColor: colors.lightPink,
 
     alignItems: 'center',
     justifyContent: 'center',
 
-    marginRight: 14,
+    marginRight: 12,
   },
 
-  cardHeaderText: {
+  headerText: {
     flex: 1,
   },
 
   serviceType: {
     color: colors.pink,
 
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '700',
 
     textTransform: 'uppercase',
@@ -472,19 +649,16 @@ const styles = StyleSheet.create({
   serviceName: {
     color: colors.primary,
 
-    fontSize: 18,
-    lineHeight: 23,
-
     fontWeight: '700',
   },
 
   infoRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
 
     gap: 8,
 
-    marginBottom: 9,
+    marginBottom: 10,
   },
 
   infoText: {
@@ -492,8 +666,8 @@ const styles = StyleSheet.create({
 
     color: colors.text,
 
-    fontSize: 15,
-    lineHeight: 21,
+    fontSize: 14,
+    lineHeight: 20,
   },
 
   actions: {
@@ -501,88 +675,84 @@ const styles = StyleSheet.create({
 
     gap: 10,
 
-    marginTop: 15,
+    marginTop: 'auto',
+    paddingTop: 10,
   },
 
-  primaryButton: {
+  mapButton: {
     flex: 1,
 
-    minHeight: 47,
-
-    backgroundColor: colors.primary,
-
-    borderRadius: 24,
-
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    gap: 7,
-  },
-
-  primaryButtonText: {
-    color: colors.white,
-
-    fontSize: 14,
-    fontWeight: '700',
-  },
-
-  secondaryButton: {
-    flex: 1,
-
-    minHeight: 47,
+    minHeight: 44,
 
     borderWidth: 1.5,
     borderColor: colors.primary,
 
-    borderRadius: 24,
+    borderRadius: 22,
 
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
 
-    gap: 7,
+    gap: 6,
   },
 
-  secondaryButtonText: {
+  mapButtonText: {
     color: colors.primary,
 
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
   },
 
-  emptyContainer: {
+  callButton: {
+    flex: 1,
+
+    minHeight: 44,
+
+    backgroundColor: colors.primary,
+
+    borderRadius: 22,
+
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    gap: 6,
+  },
+
+  callButtonText: {
+    color: colors.white,
+
+    fontSize: 13,
+    fontWeight: '700',
+  },
+
+  empty: {
     alignItems: 'center',
 
-    paddingVertical: 55,
-    paddingHorizontal: 25,
+    paddingVertical: 45,
   },
 
   emptyTitle: {
     color: colors.primary,
 
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '700',
 
-    marginTop: 15,
+    marginTop: 12,
   },
 
-  emptyDescription: {
+  emptyText: {
     color: colors.text,
 
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 14,
 
-    textAlign: 'center',
-
-    marginTop: 7,
+    marginTop: 5,
   },
 
-  infoBox: {
-    marginTop: 30,
+  demoNotice: {
+    marginTop: 25,
 
-    borderWidth: 1.5,
-    borderColor: colors.pink,
+    backgroundColor: '#EFE7EF',
 
     borderRadius: 20,
 
@@ -591,15 +761,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
 
-    gap: 11,
+    gap: 10,
   },
 
-  infoBoxText: {
+  demoText: {
     flex: 1,
 
     color: colors.text,
 
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 13,
+    lineHeight: 20,
   },
 });

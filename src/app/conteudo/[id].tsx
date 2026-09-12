@@ -1,5 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+
+import {
+  router,
+  useLocalSearchParams,
+} from 'expo-router';
 
 import {
   Pressable,
@@ -11,9 +15,17 @@ import {
 
 import { colors } from '../../constants/theme';
 import { conteudos } from '../../data/conteudos';
+import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
 
 export default function ConteudoScreen() {
-  const { id } = useLocalSearchParams();
+  const { id } =
+    useLocalSearchParams();
+
+  const {
+    isCompactPhone,
+    horizontalPadding,
+    topPadding,
+  } = useResponsiveLayout();
 
   const conteudo = conteudos.find(
     (item) => item.id === id
@@ -26,7 +38,9 @@ export default function ConteudoScreen() {
           Conteúdo não encontrado
         </Text>
 
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => router.back()}
+        >
           <Text style={styles.backLink}>
             Voltar
           </Text>
@@ -38,83 +52,160 @@ export default function ConteudoScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: topPadding,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
+        <View
+          style={[
+            styles.content,
+            {
+              paddingHorizontal:
+                horizontalPadding,
+            },
+          ]}
         >
-          <Ionicons
-            name="chevron-back"
-            size={28}
-            color={colors.primary}
-          />
-
-          <Text style={styles.backText}>
-            Voltar
-          </Text>
-        </Pressable>
-
-        <View style={styles.iconContainer}>
-          <Ionicons
-            name={conteudo.icone}
-            size={42}
-            color={colors.primary}
-          />
-        </View>
-
-        <Text style={styles.category}>
-          {conteudo.categoria}
-        </Text>
-
-        <Text style={styles.title}>
-          {conteudo.titulo}
-        </Text>
-
-        <Text style={styles.summary}>
-          {conteudo.resumo}
-        </Text>
-
-        <View style={styles.divider} />
-
-        {conteudo.texto.map((paragrafo, index) => (
-          <Text
-            key={index}
-            style={styles.paragraph}
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.back()}
           >
-            {paragrafo}
-          </Text>
-        ))}
+            <Ionicons
+              name="chevron-back"
+              size={26}
+              color={colors.primary}
+            />
 
-        <View style={styles.warning}>
-          <Ionicons
-            name="information-circle-outline"
-            size={25}
-            color={colors.primary}
-          />
+            <Text style={styles.backText}>
+              Voltar
+            </Text>
+          </Pressable>
 
-          <Text style={styles.warningText}>
-            Este conteúdo tem finalidade de orientação e não
-            substitui atendimento jurídico, policial, médico
-            ou especializado.
+          <View
+            style={[
+              styles.iconContainer,
+              {
+                width:
+                  isCompactPhone
+                    ? 66
+                    : 78,
+
+                height:
+                  isCompactPhone
+                    ? 66
+                    : 78,
+
+                borderRadius:
+                  isCompactPhone
+                    ? 33
+                    : 39,
+              },
+            ]}
+          >
+            <Ionicons
+              name={conteudo.icone}
+              size={
+                isCompactPhone
+                  ? 34
+                  : 40
+              }
+              color={colors.primary}
+            />
+          </View>
+
+          <Text style={styles.category}>
+            {conteudo.categoria}
           </Text>
+
+          <Text
+            style={[
+              styles.title,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 29
+                    : 35,
+
+                lineHeight:
+                  isCompactPhone
+                    ? 36
+                    : 42,
+              },
+            ]}
+          >
+            {conteudo.titulo}
+          </Text>
+
+          <Text
+            style={[
+              styles.summary,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 16
+                    : 18,
+              },
+            ]}
+          >
+            {conteudo.resumo}
+          </Text>
+
+          <View style={styles.divider} />
+
+          {conteudo.texto.map(
+            (paragrafo, index) => (
+              <Text
+                key={index}
+                style={[
+                  styles.paragraph,
+                  {
+                    fontSize:
+                      isCompactPhone
+                        ? 15
+                        : 17,
+                  },
+                ]}
+              >
+                {paragrafo}
+              </Text>
+            )
+          )}
+
+          <View style={styles.warning}>
+            <Ionicons
+              name="information-circle-outline"
+              size={24}
+              color={colors.primary}
+            />
+
+            <Text style={styles.warningText}>
+              Este conteúdo tem finalidade de
+              orientação e não substitui
+              atendimento jurídico, policial,
+              médico ou especializado.
+            </Text>
+          </View>
+
+          <Pressable
+            style={styles.helpButton}
+            onPress={() =>
+              router.push('/denunciar')
+            }
+          >
+            <Text style={styles.helpButtonText}>
+              Ver canais de ajuda
+            </Text>
+
+            <Ionicons
+              name="arrow-forward"
+              size={21}
+              color={colors.white}
+            />
+          </Pressable>
         </View>
-
-        <Pressable
-          style={styles.helpButton}
-          onPress={() => router.push('/denunciar')}
-        >
-          <Text style={styles.helpButtonText}>
-            Ver canais de ajuda
-          </Text>
-
-          <Ionicons
-            name="arrow-forward"
-            size={22}
-            color={colors.white}
-          />
-        </Pressable>
       </ScrollView>
     </View>
   );
@@ -126,82 +217,81 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  content: {
-    paddingHorizontal: 26,
-    paddingTop: 45,
+  scrollContent: {
+    alignItems: 'center',
+
     paddingBottom: 60,
+  },
+
+  content: {
+    width: '100%',
+    maxWidth: 760,
   },
 
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
+
     alignSelf: 'flex-start',
-    marginBottom: 35,
+
+    marginBottom: 30,
   },
 
   backText: {
     color: colors.primary,
-    fontSize: 17,
+
+    fontSize: 16,
     fontWeight: '600',
   },
 
   iconContainer: {
-    width: 82,
-    height: 82,
-
-    borderRadius: 41,
-
     backgroundColor: colors.lightPink,
 
     alignItems: 'center',
     justifyContent: 'center',
 
-    marginBottom: 18,
+    marginBottom: 16,
   },
 
   category: {
     color: colors.pink,
 
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
 
     textTransform: 'uppercase',
 
-    marginBottom: 7,
+    marginBottom: 6,
   },
 
   title: {
     color: colors.primary,
 
-    fontSize: 35,
-    lineHeight: 42,
-
     fontWeight: '700',
 
-    marginBottom: 12,
+    marginBottom: 11,
   },
 
   summary: {
     color: colors.text,
 
-    fontSize: 18,
     lineHeight: 27,
   },
 
   divider: {
     height: 1,
+
     backgroundColor: '#DED5D7',
 
-    marginVertical: 28,
+    marginVertical: 25,
   },
 
   paragraph: {
     color: colors.text,
 
-    fontSize: 17,
-    lineHeight: 27,
+    lineHeight: 26,
 
-    marginBottom: 18,
+    marginBottom: 17,
   },
 
   warning: {
@@ -210,14 +300,14 @@ const styles = StyleSheet.create({
 
     borderRadius: 20,
 
-    padding: 17,
+    padding: 16,
 
     flexDirection: 'row',
     alignItems: 'flex-start',
 
-    gap: 11,
+    gap: 10,
 
-    marginTop: 10,
+    marginTop: 8,
   },
 
   warningText: {
@@ -225,30 +315,30 @@ const styles = StyleSheet.create({
 
     color: colors.text,
 
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 13,
+    lineHeight: 20,
   },
 
   helpButton: {
-    minHeight: 60,
+    minHeight: 58,
 
     backgroundColor: colors.primary,
 
-    borderRadius: 30,
+    borderRadius: 29,
 
-    marginTop: 28,
+    marginTop: 25,
 
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
 
-    gap: 10,
+    gap: 9,
   },
 
   helpButtonText: {
     color: colors.white,
 
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
   },
 
@@ -266,16 +356,16 @@ const styles = StyleSheet.create({
   notFoundTitle: {
     color: colors.primary,
 
-    fontSize: 25,
+    fontSize: 24,
     fontWeight: '700',
   },
 
   backLink: {
     color: colors.pink,
 
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
 
-    marginTop: 20,
+    marginTop: 18,
   },
 });

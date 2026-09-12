@@ -13,7 +13,8 @@ export const conteudos: ConteudoEducativo[] = [
   {
     id: 'reconheca-sinais',
     titulo: 'Reconheça os sinais',
-    resumo: 'Entenda comportamentos que podem indicar uma situação de violência.',
+    resumo:
+      'Entenda comportamentos que podem indicar uma situação de violência.',
     categoria: 'Orientação',
     icone: 'eye-outline',
     texto: [
@@ -26,20 +27,22 @@ export const conteudos: ConteudoEducativo[] = [
   {
     id: 'medida-protetiva',
     titulo: 'Medida protetiva',
-    resumo: 'Entenda para que serve e quais caminhos existem para buscar proteção.',
+    resumo:
+      'Conheça caminhos disponíveis para buscar proteção.',
     categoria: 'Direitos',
     icone: 'shield-checkmark-outline',
     texto: [
       'As medidas protetivas existem para ajudar a proteger mulheres em situação de violência.',
       'A busca por proteção não deve ser confundida com a obrigação de registrar previamente um boletim de ocorrência.',
-      'O SOMA pode orientar sobre os canais oficiais disponíveis para buscar informação e atendimento.',
+      'O SOMA pode orientar sobre canais oficiais disponíveis para buscar informação e atendimento.',
     ],
   },
 
   {
     id: 'ajudar-outra-pessoa',
     titulo: 'Quero ajudar alguém',
-    resumo: 'Saiba como apoiar uma amiga, familiar, vizinha ou conhecida.',
+    resumo:
+      'Saiba como apoiar uma amiga, familiar, vizinha ou conhecida.',
     categoria: 'Rede de apoio',
     icone: 'people-outline',
     texto: [
@@ -53,25 +56,27 @@ export const conteudos: ConteudoEducativo[] = [
   {
     id: 'seguranca-digital',
     titulo: 'Segurança digital',
-    resumo: 'Cuidados ao buscar ajuda usando celular, computador ou contas compartilhadas.',
+    resumo:
+      'Cuidados ao buscar ajuda usando celular, computador ou contas compartilhadas.',
     categoria: 'Segurança',
     icone: 'lock-closed-outline',
     texto: [
       'Em algumas situações, o dispositivo pode ser monitorado ou acessado por outra pessoa.',
       'Considere o risco antes de armazenar relatos, fotos, localização ou informações sensíveis.',
-      'O SOMA foi pensado para minimizar rastros e permitir acesso rápido a informações importantes.',
+      'O SOMA foi pensado para reduzir a exposição de informações e facilitar o acesso a conteúdos importantes.',
     ],
   },
 
   {
     id: 'canais-oficiais',
     titulo: 'Qual canal procurar?',
-    resumo: 'Entenda a diferença entre emergência, denúncia, BO e orientação.',
+    resumo:
+      'Entenda a diferença entre emergência, denúncia, BO e orientação.',
     categoria: 'Orientação',
     icone: 'navigate-outline',
     texto: [
       'Situações diferentes podem exigir canais diferentes.',
-      'Emergência, denúncia anônima, boletim de ocorrência, medida protetiva e orientação não são a mesma coisa.',
+      'Emergência, denúncia, boletim de ocorrência, medida protetiva e orientação não são a mesma coisa.',
       'O SOMA ajuda a identificar a necessidade e direciona para os serviços oficiais correspondentes.',
     ],
   },

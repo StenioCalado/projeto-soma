@@ -12,43 +12,72 @@ import {
 } from 'react-native';
 
 import { colors } from '../constants/theme';
-import {
-  CanalDenuncia,
-  canaisDenuncia,
-} from '../data/canaisDenuncia';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+
+const canais = [
+  {
+    titulo: 'Ligue 180',
+    descricao:
+      'Central de Atendimento à Mulher para orientação e encaminhamento.',
+    icone: 'call-outline',
+    acao: 'phone',
+    valor: 'tel:180',
+    botao: 'Ligar para 180',
+  },
+  {
+    titulo: 'Polícia Militar - 190',
+    descricao:
+      'Utilize em situações de emergência ou perigo imediato.',
+    icone: 'warning-outline',
+    acao: 'phone',
+    valor: 'tel:190',
+    botao: 'Ligar para 190',
+  },
+  {
+    titulo: 'Delegacia da Mulher',
+    descricao:
+      'Consulte serviços de atendimento e unidades disponíveis.',
+    icone: 'business-outline',
+    acao: 'route',
+    valor: '/rede-apoio',
+    botao: 'Ver rede de apoio',
+  },
+  {
+    titulo: 'Web Denúncia',
+    descricao:
+      'Acesse o canal online de denúncia do Estado de São Paulo.',
+    icone: 'globe-outline',
+    acao: 'url',
+    valor:
+      'https://www.webdenuncia.sp.gov.br/',
+    botao: 'Abrir canal',
+  },
+];
 
 export default function DenunciarScreen() {
-  async function handleCanalPress(canal: CanalDenuncia) {
+  const {
+    isCompactPhone,
+    isPhone,
+    horizontalPadding,
+    topPadding,
+    contentMaxWidth,
+  } = useResponsiveLayout();
+
+  async function executarAcao(
+    acao: string,
+    valor: string
+  ) {
     try {
-      if (canal.tipoAcao === 'telefone') {
-        const url = `tel:${canal.destino}`;
-
-        const supported = await Linking.canOpenURL(url);
-
-        if (supported) {
-          await Linking.openURL(url);
-        } else {
-          Alert.alert(
-            'Ligação indisponível',
-            `Não foi possível iniciar uma ligação para ${canal.destino} neste dispositivo.`
-          );
-        }
-
+      if (acao === 'route') {
+        router.push(valor as any);
         return;
       }
 
-      if (canal.tipoAcao === 'url') {
-        await Linking.openURL(canal.destino);
-        return;
-      }
-
-      if (canal.tipoAcao === 'rota') {
-        router.push(canal.destino as any);
-      }
+      await Linking.openURL(valor);
     } catch {
       Alert.alert(
-        'Não foi possível abrir o canal',
-        'Tente novamente ou procure o serviço diretamente.'
+        'Não foi possível abrir',
+        'Tente novamente ou utilize o canal diretamente.'
       );
     }
   }
@@ -56,111 +85,204 @@ export default function DenunciarScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: topPadding,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
+        <View
+          style={[
+            styles.content,
+            {
+              maxWidth: contentMaxWidth,
+              paddingHorizontal:
+                horizontalPadding,
+            },
+          ]}
         >
-          <Ionicons
-            name="chevron-back"
-            size={28}
-            color={colors.primary}
-          />
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={26}
+              color={colors.primary}
+            />
 
-          <Text style={styles.backText}>
-            Voltar
+            <Text style={styles.backText}>
+              Voltar
+            </Text>
+          </Pressable>
+
+          <Text
+            style={[
+              styles.title,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 30
+                    : 36,
+              },
+            ]}
+          >
+            Como buscar ajuda?
           </Text>
-        </Pressable>
 
-        <Text style={styles.title}>
-          Como denunciar?
-        </Text>
-
-        <Text style={styles.subtitle}>
-          Escolha o canal mais adequado para a sua situação.
-        </Text>
-
-        <View style={styles.grid}>
-          {canaisDenuncia.map((canal) => (
-            <Pressable
-              key={canal.id}
-              style={({ pressed }) => [
-                styles.card,
-                {
-                  backgroundColor: canal.cor,
-                },
-                pressed && styles.cardPressed,
-              ]}
-              onPress={() => handleCanalPress(canal)}
-            >
-              <Ionicons
-                name={canal.icone}
-                size={42}
-                color={colors.white}
-              />
-
-              <Text style={styles.cardTitle}>
-                {canal.titulo}
-              </Text>
-
-              <Text style={styles.cardDescription}>
-                {canal.descricao}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        <View style={styles.warningBox}>
-          <Ionicons
-            name="information-circle-outline"
-            size={28}
-            color={colors.primary}
-          />
-
-          <Text style={styles.warningText}>
-            <Text style={styles.warningStrong}>
-              Importante:{' '}
-            </Text>
-
-            o SOMA não realiza nem armazena denúncias.
-            A plataforma orienta e direciona você para
-            canais oficiais.
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 15
+                    : 18,
+              },
+            ]}
+          >
+            Cada situação pode precisar de um
+            caminho diferente. Escolha o canal
+            mais adequado para o momento.
           </Text>
-        </View>
 
-        <View style={styles.emergencyBox}>
-          <Ionicons
-            name="warning-outline"
-            size={28}
-            color={colors.primary}
-          />
+          <View style={styles.cards}>
+            {canais.map((canal) => (
+              <View
+                key={canal.titulo}
+                style={[
+                  styles.card,
+                  {
+                    width:
+                      isPhone
+                        ? '100%'
+                        : '48.5%',
+                  },
+                ]}
+              >
+                <View style={styles.cardHeader}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      {
+                        width:
+                          isCompactPhone
+                            ? 50
+                            : 58,
 
-          <View style={styles.emergencyContent}>
-            <Text style={styles.emergencyTitle}>
-              Está em perigo agora?
-            </Text>
+                        height:
+                          isCompactPhone
+                            ? 50
+                            : 58,
 
-            <Text style={styles.emergencyDescription}>
-              Em uma situação de risco imediato, priorize o atendimento de emergência pelo 190.
-            </Text>
+                        borderRadius:
+                          isCompactPhone
+                            ? 25
+                            : 29,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={canal.icone as any}
+                      size={
+                        isCompactPhone
+                          ? 26
+                          : 30
+                      }
+                      color={colors.primary}
+                    />
+                  </View>
 
-            <Pressable
-              style={styles.emergencyButton}
-              onPress={() => Linking.openURL('tel:190')}
-            >
-              <Ionicons
-                name="call"
-                size={22}
-                color={colors.white}
-              />
+                  <Text
+                    style={[
+                      styles.cardTitle,
+                      {
+                        fontSize:
+                          isCompactPhone
+                            ? 18
+                            : 20,
+                      },
+                    ]}
+                  >
+                    {canal.titulo}
+                  </Text>
+                </View>
 
-              <Text style={styles.emergencyButtonText}>
-                Ligar 190
-              </Text>
-            </Pressable>
+                <Text style={styles.cardDescription}>
+                  {canal.descricao}
+                </Text>
+
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.cardButton,
+                    pressed &&
+                      styles.pressed,
+                  ]}
+                  onPress={() =>
+                    executarAcao(
+                      canal.acao,
+                      canal.valor
+                    )
+                  }
+                >
+                  <Text style={styles.cardButtonText}>
+                    {canal.botao}
+                  </Text>
+
+                  <Ionicons
+                    name="arrow-forward"
+                    size={18}
+                    color={colors.white}
+                  />
+                </Pressable>
+              </View>
+            ))}
           </View>
+
+          <View style={styles.notice}>
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={27}
+              color={colors.primary}
+            />
+
+            <Text style={styles.noticeText}>
+              O SOMA não realiza nem armazena
+              denúncias. A plataforma direciona
+              você para canais e serviços oficiais.
+            </Text>
+          </View>
+
+          <Pressable
+            style={styles.emergencyButton}
+            onPress={() =>
+              router.push('/emergencia')
+            }
+          >
+            <Ionicons
+              name="warning"
+              size={25}
+              color={colors.white}
+            />
+
+            <View style={styles.emergencyContent}>
+              <Text style={styles.emergencyTitle}>
+                Está em perigo agora?
+              </Text>
+
+              <Text style={styles.emergencyText}>
+                Acesse a opção de emergência.
+              </Text>
+            </View>
+
+            <Ionicons
+              name="chevron-forward"
+              size={24}
+              color={colors.white}
+            />
+          </Pressable>
         </View>
       </ScrollView>
     </View>
@@ -173,131 +295,173 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
+  scrollContent: {
+    alignItems: 'center',
+    paddingBottom: 60,
+  },
+
   content: {
-    paddingHorizontal: 26,
-    paddingTop: 45,
-    paddingBottom: 50,
+    width: '100%',
   },
 
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 30,
+
     alignSelf: 'flex-start',
+
+    marginBottom: 28,
   },
 
   backText: {
     color: colors.primary,
-    fontSize: 17,
+
+    fontSize: 16,
     fontWeight: '600',
   },
 
   title: {
     color: colors.primary,
-    fontSize: 36,
+
     fontWeight: '700',
-    marginBottom: 12,
+
+    marginBottom: 10,
   },
 
   subtitle: {
     color: colors.text,
-    fontSize: 18,
-    lineHeight: 27,
-    marginBottom: 30,
+
+    lineHeight: 26,
+
+    maxWidth: 650,
+
+    marginBottom: 28,
   },
 
-  grid: {
+  cards: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+
     justifyContent: 'space-between',
-    rowGap: 18,
+
+    gap: 14,
   },
 
   card: {
-    width: '48%',
-    minHeight: 205,
+    minHeight: 235,
 
-    borderRadius: 24,
+    backgroundColor: colors.white,
 
-    paddingHorizontal: 16,
-    paddingVertical: 22,
+    borderWidth: 1,
+    borderColor: '#E4DADC',
+
+    borderRadius: 22,
+
+    padding: 18,
+  },
+
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    marginBottom: 14,
+  },
+
+  iconContainer: {
+    backgroundColor: colors.lightPink,
 
     alignItems: 'center',
     justifyContent: 'center',
-  },
 
-  cardPressed: {
-    opacity: 0.8,
-    transform: [
-      {
-        scale: 0.97,
-      },
-    ],
+    marginRight: 12,
   },
 
   cardTitle: {
-    color: colors.white,
+    flex: 1,
 
-    fontSize: 19,
+    color: colors.primary,
+
     fontWeight: '700',
-
-    textAlign: 'center',
-
-    marginTop: 14,
-    marginBottom: 8,
   },
 
   cardDescription: {
+    flex: 1,
+
+    color: colors.text,
+
+    fontSize: 14,
+    lineHeight: 21,
+
+    marginBottom: 16,
+  },
+
+  cardButton: {
+    minHeight: 46,
+
+    backgroundColor: colors.primary,
+
+    borderRadius: 23,
+
+    paddingHorizontal: 16,
+
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    gap: 7,
+  },
+
+  cardButtonText: {
     color: colors.white,
 
     fontSize: 14,
-    lineHeight: 20,
-
-    textAlign: 'center',
+    fontWeight: '700',
   },
 
-  warningBox: {
-    marginTop: 35,
+  pressed: {
+    opacity: 0.75,
+  },
+
+  notice: {
+    marginTop: 25,
 
     borderWidth: 1.5,
     borderColor: colors.pink,
+
+    borderRadius: 20,
+
+    padding: 17,
+
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+
+    gap: 11,
+  },
+
+  noticeText: {
+    flex: 1,
+
+    color: colors.text,
+
+    fontSize: 14,
+    lineHeight: 21,
+  },
+
+  emergencyButton: {
+    minHeight: 88,
+
+    marginTop: 22,
+
+    backgroundColor: '#B4495A',
 
     borderRadius: 22,
 
     padding: 18,
 
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
 
-    gap: 12,
-  },
-
-  warningText: {
-    flex: 1,
-
-    color: colors.text,
-
-    fontSize: 16,
-    lineHeight: 23,
-  },
-
-  warningStrong: {
-    color: colors.primary,
-    fontWeight: '700',
-  },
-
-  emergencyBox: {
-    marginTop: 25,
-
-    backgroundColor: '#F2E1E4',
-
-    borderRadius: 22,
-
-    padding: 20,
-
-    flexDirection: 'row',
-
-    gap: 14,
+    gap: 13,
   },
 
   emergencyContent: {
@@ -305,43 +469,17 @@ const styles = StyleSheet.create({
   },
 
   emergencyTitle: {
-    color: colors.primary,
-
-    fontSize: 19,
-    fontWeight: '700',
-
-    marginBottom: 6,
-  },
-
-  emergencyDescription: {
-    color: colors.text,
-
-    fontSize: 15,
-    lineHeight: 22,
-
-    marginBottom: 16,
-  },
-
-  emergencyButton: {
-    backgroundColor: colors.primary,
-
-    borderRadius: 25,
-
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-
-    alignSelf: 'flex-start',
-
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    gap: 8,
-  },
-
-  emergencyButtonText: {
     color: colors.white,
 
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
+
+    marginBottom: 3,
+  },
+
+  emergencyText: {
+    color: '#FBECEF',
+
+    fontSize: 13,
   },
 });

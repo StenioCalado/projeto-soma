@@ -1,3 +1,9 @@
+import { useState } from 'react';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+
 import {
   Pressable,
   ScrollView,
@@ -6,80 +12,264 @@ import {
   View,
 } from 'react-native';
 
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-
 import { colors } from '../constants/theme';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+
+const ONBOARDING_STORAGE_KEY =
+  '@soma:hide-onboarding';
 
 const items = [
   {
     title: 'Tipos de Violência',
-    description: 'Conheça seus direitos e saiba reconhecer os sinais.',
+    description:
+      'Conheça seus direitos e saiba reconhecer os sinais.',
     icon: 'hand-left-outline',
   },
   {
     title: 'Como denunciar?',
-    description: 'Passo a passo e canais oficiais.',
+    description:
+      'Conheça os canais oficiais disponíveis.',
     icon: 'call-outline',
   },
   {
     title: 'Mapa de Calor',
-    description: 'Veja dados sobre ocorrências na sua região.',
+    description:
+      'Visualize informações territoriais e pontos de apoio.',
     icon: 'location-outline',
   },
   {
     title: 'Rede de Apoio',
-    description: 'ONGs e centros de proteção perto de você.',
+    description:
+      'Encontre serviços de acolhimento e orientação.',
     icon: 'people-outline',
   },
 ];
 
 export default function OnboardingScreen() {
+  const [
+    naoMostrarNovamente,
+    setNaoMostrarNovamente,
+  ] = useState(false);
+
+  const {
+    isCompactPhone,
+    isPhone,
+    horizontalPadding,
+    topPadding,
+    contentMaxWidth,
+  } = useResponsiveLayout();
+
+  async function continuar() {
+    try {
+      if (naoMostrarNovamente) {
+        await AsyncStorage.setItem(
+          ONBOARDING_STORAGE_KEY,
+          'true'
+        );
+      }
+
+      router.replace('/home');
+    } catch (error) {
+      console.error(
+        'Erro ao salvar preferência:',
+        error
+      );
+
+      router.replace('/home');
+    }
+  }
+
+  function pular() {
+    router.replace('/home');
+  }
+
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.scrollContent,
+        {
+          paddingTop: topPadding,
+        },
+      ]}
       showsVerticalScrollIndicator={false}
     >
-      <Pressable
-        style={styles.skip}
-        onPress={() => router.replace('/home')}
+      <View
+        style={[
+          styles.content,
+          {
+            maxWidth:
+              contentMaxWidth ?? 700,
+
+            paddingHorizontal:
+              horizontalPadding,
+          },
+        ]}
       >
-        <Text style={styles.skipText}>pular</Text>
-      </Pressable>
+        <Pressable
+          style={styles.skip}
+          onPress={pular}
+        >
+          <Text style={styles.skipText}>
+            Pular
+          </Text>
+        </Pressable>
 
-      <Text style={styles.title}>
-        O que você encontra{'\n'}aqui?
-      </Text>
+        <Text
+          style={[
+            styles.title,
+            {
+              fontSize:
+                isCompactPhone
+                  ? 30
+                  : 36,
 
-      <View style={styles.list}>
-        {items.map((item) => (
-          <View key={item.title} style={styles.card}>
-            <View style={styles.iconContainer}>
+              lineHeight:
+                isCompactPhone
+                  ? 37
+                  : 43,
+            },
+          ]}
+        >
+          O que você encontra aqui?
+        </Text>
+
+        <View style={styles.list}>
+          {items.map((item) => (
+            <View
+              key={item.title}
+              style={[
+                styles.card,
+                {
+                  width:
+                    isPhone
+                      ? '100%'
+                      : '48.5%',
+
+                  padding:
+                    isCompactPhone
+                      ? 13
+                      : 16,
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.iconContainer,
+                  {
+                    width:
+                      isCompactPhone
+                        ? 58
+                        : 70,
+
+                    height:
+                      isCompactPhone
+                        ? 58
+                        : 70,
+
+                    borderRadius:
+                      isCompactPhone
+                        ? 29
+                        : 35,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name={item.icon as any}
+                  size={
+                    isCompactPhone
+                      ? 29
+                      : 36
+                  }
+                  color={colors.primary}
+                />
+              </View>
+
+              <View style={styles.cardContent}>
+                <Text
+                  style={[
+                    styles.cardTitle,
+                    {
+                      fontSize:
+                        isCompactPhone
+                          ? 17
+                          : 19,
+                    },
+                  ]}
+                >
+                  {item.title}
+                </Text>
+
+                <Text
+                  style={[
+                    styles.cardDescription,
+                    {
+                      fontSize:
+                        isCompactPhone
+                          ? 14
+                          : 16,
+                    },
+                  ]}
+                >
+                  {item.description}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <Pressable
+          style={styles.checkboxContainer}
+          onPress={() =>
+            setNaoMostrarNovamente(
+              !naoMostrarNovamente
+            )
+          }
+        >
+          <View
+            style={[
+              styles.checkbox,
+              naoMostrarNovamente &&
+                styles.checkboxChecked,
+            ]}
+          >
+            {naoMostrarNovamente && (
               <Ionicons
-                name={item.icon as any}
-                size={42}
-                color={colors.text}
+                name="checkmark"
+                size={18}
+                color={colors.white}
               />
-            </View>
-
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-
-              <Text style={styles.cardDescription}>
-                {item.description}
-              </Text>
-            </View>
+            )}
           </View>
-        ))}
-      </View>
 
-      <Pressable
-        style={styles.button}
-        onPress={() => router.replace('/home')}
-      >
-        <Text style={styles.buttonText}>Começar</Text>
-      </Pressable>
+          <Text style={styles.checkboxText}>
+            Não mostrar esta tela novamente
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed &&
+              styles.buttonPressed,
+          ]}
+          onPress={continuar}
+        >
+          <Text
+            style={[
+              styles.buttonText,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 19
+                    : 22,
+              },
+            ]}
+          >
+            Começar
+          </Text>
+        </Pressable>
+      </View>
     </ScrollView>
   );
 }
@@ -90,53 +280,67 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  content: {
-    paddingHorizontal: 32,
-    paddingTop: 50,
+  scrollContent: {
+    alignItems: 'center',
     paddingBottom: 50,
+  },
+
+  content: {
+    width: '100%',
   },
 
   skip: {
     alignSelf: 'flex-end',
-    marginBottom: 55,
+    paddingVertical: 8,
+    marginBottom: 26,
   },
 
   skipText: {
-    color: '#918791',
-    fontSize: 20,
-    letterSpacing: 3,
+    color: '#817881',
+
+    fontSize: 16,
+    fontWeight: '600',
   },
 
   title: {
     color: colors.primary,
-    fontSize: 36,
-    lineHeight: 42,
+
     fontWeight: '700',
-    marginBottom: 30,
+
+    marginBottom: 26,
   },
 
   list: {
-    gap: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+
+    justifyContent: 'space-between',
+
+    gap: 14,
   },
 
   card: {
-    minHeight: 120,
+    minHeight: 105,
+
     borderWidth: 1.5,
-    borderColor: colors.text,
+    borderColor: '#D8CDD1',
+
     borderRadius: 22,
-    padding: 15,
+
     flexDirection: 'row',
     alignItems: 'center',
+
+    backgroundColor:
+      colors.background,
   },
 
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
     backgroundColor: '#D99BAD',
+
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 15,
+
+    marginRight: 13,
   },
 
   cardContent: {
@@ -145,28 +349,80 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     color: colors.primary,
-    fontSize: 20,
+
     fontWeight: '700',
-    marginBottom: 5,
+
+    marginBottom: 4,
   },
 
   cardDescription: {
     color: colors.text,
-    fontSize: 17,
-    lineHeight: 24,
+
+    lineHeight: 21,
+  },
+
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    marginTop: 28,
+  },
+
+  checkbox: {
+    width: 24,
+    height: 24,
+
+    borderRadius: 6,
+
+    borderWidth: 2,
+    borderColor: colors.primary,
+
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    marginRight: 10,
+  },
+
+  checkboxChecked: {
+    backgroundColor: colors.primary,
+  },
+
+  checkboxText: {
+    flex: 1,
+
+    color: colors.text,
+
+    fontSize: 15,
+    lineHeight: 20,
   },
 
   button: {
-    height: 76,
+    minHeight: 64,
+
     backgroundColor: colors.primary,
-    borderRadius: 38,
-    marginTop: 45,
+
+    borderRadius: 32,
+
+    marginTop: 24,
+
     alignItems: 'center',
     justifyContent: 'center',
+
+    paddingHorizontal: 20,
+  },
+
+  buttonPressed: {
+    opacity: 0.8,
+
+    transform: [
+      {
+        scale: 0.98,
+      },
+    ],
   },
 
   buttonText: {
     color: colors.white,
-    fontSize: 24,
+    fontWeight: '600',
   },
 });

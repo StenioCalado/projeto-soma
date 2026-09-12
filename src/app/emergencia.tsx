@@ -12,26 +12,26 @@ import {
 } from 'react-native';
 
 import { colors } from '../constants/theme';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 export default function EmergenciaScreen() {
+  const {
+    isCompactPhone,
+    isPhone,
+    horizontalPadding,
+    topPadding,
+    contentMaxWidth,
+  } = useResponsiveLayout();
+
   async function ligar(numero: string) {
     try {
-      const url = `tel:${numero}`;
-
-      const supported = await Linking.canOpenURL(url);
-
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert(
-          'Ligação indisponível',
-          `Não foi possível iniciar uma ligação para ${numero} neste dispositivo.`
-        );
-      }
+      await Linking.openURL(
+        `tel:${numero}`
+      );
     } catch {
       Alert.alert(
-        'Não foi possível abrir o telefone',
-        'Tente novamente ou procure o canal diretamente.'
+        'Não foi possível realizar a ligação',
+        `Ligue diretamente para ${numero}.`
       );
     }
   }
@@ -39,220 +39,256 @@ export default function EmergenciaScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: topPadding,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Voltar */}
-
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
+        <View
+          style={[
+            styles.content,
+            {
+              maxWidth: contentMaxWidth,
+              paddingHorizontal:
+                horizontalPadding,
+            },
+          ]}
         >
-          <Ionicons
-            name="chevron-back"
-            size={28}
-            color={colors.primary}
-          />
-
-          <Text style={styles.backText}>
-            Voltar
-          </Text>
-        </Pressable>
-
-        {/* Cabeçalho */}
-
-        <View style={styles.headerIcon}>
-          <Ionicons
-            name="warning-outline"
-            size={48}
-            color={colors.white}
-          />
-        </View>
-
-        <Text style={styles.title}>
-          Você está em perigo agora?
-        </Text>
-
-        <Text style={styles.subtitle}>
-          Se existe risco imediato para você ou outra pessoa,
-          priorize o atendimento de emergência.
-        </Text>
-
-        {/* Emergência 190 */}
-
-        <View style={styles.emergencyCard}>
-          <View style={styles.cardIcon}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons
-              name="call"
-              size={34}
-              color={colors.white}
+              name="chevron-back"
+              size={26}
+              color={colors.primary}
+            />
+
+            <Text style={styles.backText}>
+              Voltar
+            </Text>
+          </Pressable>
+
+          <View style={styles.warningIcon}>
+            <Ionicons
+              name="warning"
+              size={
+                isCompactPhone
+                  ? 34
+                  : 42
+              }
+              color="#B4495A"
             />
           </View>
 
-          <Text style={styles.emergencyLabel}>
-            EMERGÊNCIA
-          </Text>
-
-          <Text style={styles.emergencyNumber}>
-            190
-          </Text>
-
-          <Text style={styles.emergencyDescription}>
-            Polícia Militar
-          </Text>
-
-          <Text style={styles.emergencyExplanation}>
-            Utilize este canal quando houver perigo imediato,
-            agressão em andamento ou risco à integridade física.
-          </Text>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.callButton,
-              pressed && styles.buttonPressed,
+          <Text
+            style={[
+              styles.title,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 29
+                    : 36,
+              },
             ]}
-            onPress={() => ligar('190')}
+          >
+            Você está em perigo agora?
+          </Text>
+
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                fontSize:
+                  isCompactPhone
+                    ? 15
+                    : 18,
+              },
+            ]}
+          >
+            Se houver risco imediato para você
+            ou outra pessoa, priorize o contato
+            com o serviço oficial de emergência.
+          </Text>
+
+          <View
+            style={[
+              styles.emergencyCard,
+              {
+                padding:
+                  isCompactPhone
+                    ? 20
+                    : 28,
+              },
+            ]}
           >
             <Ionicons
-              name="call"
+              name="shield-outline"
+              size={
+                isCompactPhone
+                  ? 44
+                  : 58
+              }
+              color={colors.white}
+            />
+
+            <Text style={styles.emergencyLabel}>
+              EMERGÊNCIA
+            </Text>
+
+            <Text
+              style={[
+                styles.number,
+                {
+                  fontSize:
+                    isCompactPhone
+                      ? 58
+                      : 72,
+                },
+              ]}
+            >
+              190
+            </Text>
+
+            <Text style={styles.police}>
+              Polícia Militar
+            </Text>
+
+            <Text style={styles.emergencyDescription}>
+              Utilize em situações de perigo
+              imediato ou quando houver risco
+              à integridade física.
+            </Text>
+
+            <Pressable
+              style={styles.callButton}
+              onPress={() =>
+                ligar('190')
+              }
+            >
+              <Ionicons
+                name="call"
+                size={21}
+                color="#B4495A"
+              />
+
+              <Text style={styles.callButtonText}>
+                Ligar para 190
+              </Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.notice}>
+            <Ionicons
+              name="information-circle-outline"
               size={24}
               color={colors.primary}
             />
 
-            <Text style={styles.callButtonText}>
-              Ligar para 190
+            <Text style={styles.noticeText}>
+              O SOMA não aciona a polícia nem
+              envia pedidos de socorro. O botão
+              apenas abre o canal oficial de
+              ligação do dispositivo.
             </Text>
-          </Pressable>
-        </View>
+          </View>
 
-        {/* Aviso */}
-
-        <View style={styles.warningBox}>
-          <Ionicons
-            name="information-circle-outline"
-            size={26}
-            color={colors.primary}
-          />
-
-          <Text style={styles.warningText}>
-            O SOMA não aciona viaturas nem envia pedidos de
-            socorro diretamente. O botão acima apenas abre o
-            canal oficial de emergência do seu dispositivo.
+          <Text style={styles.sectionTitle}>
+            Não é uma emergência imediata?
           </Text>
+
+          <View style={styles.options}>
+            <Pressable
+              style={[
+                styles.optionCard,
+                {
+                  width:
+                    isPhone
+                      ? '100%'
+                      : '31.8%',
+                },
+              ]}
+              onPress={() =>
+                ligar('180')
+              }
+            >
+              <Ionicons
+                name="call-outline"
+                size={27}
+                color={colors.primary}
+              />
+
+              <Text style={styles.optionTitle}>
+                Ligue 180
+              </Text>
+
+              <Text style={styles.optionText}>
+                Orientação e atendimento à mulher.
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.optionCard,
+                {
+                  width:
+                    isPhone
+                      ? '100%'
+                      : '31.8%',
+                },
+              ]}
+              onPress={() =>
+                router.push('/denunciar')
+              }
+            >
+              <Ionicons
+                name="document-text-outline"
+                size={27}
+                color={colors.primary}
+              />
+
+              <Text style={styles.optionTitle}>
+                Canais de ajuda
+              </Text>
+
+              <Text style={styles.optionText}>
+                Conheça outras formas de buscar atendimento.
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.optionCard,
+                {
+                  width:
+                    isPhone
+                      ? '100%'
+                      : '31.8%',
+                },
+              ]}
+              onPress={() =>
+                router.push('/rede-apoio')
+              }
+            >
+              <Ionicons
+                name="people-outline"
+                size={27}
+                color={colors.primary}
+              />
+
+              <Text style={styles.optionTitle}>
+                Rede de apoio
+              </Text>
+
+              <Text style={styles.optionText}>
+                Consulte serviços de acolhimento e orientação.
+              </Text>
+            </Pressable>
+          </View>
         </View>
-
-        {/* Outras situações */}
-
-        <Text style={styles.sectionTitle}>
-          Não é uma emergência imediata?
-        </Text>
-
-        <Text style={styles.sectionDescription}>
-          Você também pode buscar orientação ou conhecer outros
-          canais de apoio.
-        </Text>
-
-        {/* 180 */}
-
-        <Pressable
-          style={({ pressed }) => [
-            styles.optionCard,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => ligar('180')}
-        >
-          <View style={styles.optionIcon}>
-            <Ionicons
-              name="call-outline"
-              size={28}
-              color={colors.primary}
-            />
-          </View>
-
-          <View style={styles.optionContent}>
-            <Text style={styles.optionTitle}>
-              Ligue 180
-            </Text>
-
-            <Text style={styles.optionDescription}>
-              Orientação e atendimento às mulheres.
-            </Text>
-          </View>
-
-          <Ionicons
-            name="chevron-forward"
-            size={24}
-            color={colors.primary}
-          />
-        </Pressable>
-
-        {/* Denunciar */}
-
-        <Pressable
-          style={({ pressed }) => [
-            styles.optionCard,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => router.push('/denunciar')}
-        >
-          <View style={styles.optionIcon}>
-            <Ionicons
-              name="chatbox-ellipses-outline"
-              size={28}
-              color={colors.primary}
-            />
-          </View>
-
-          <View style={styles.optionContent}>
-            <Text style={styles.optionTitle}>
-              Ver canais de denúncia
-            </Text>
-
-            <Text style={styles.optionDescription}>
-              Conheça outras formas de buscar ajuda.
-            </Text>
-          </View>
-
-          <Ionicons
-            name="chevron-forward"
-            size={24}
-            color={colors.primary}
-          />
-        </Pressable>
-
-        {/* Rede de apoio */}
-
-        <Pressable
-          style={({ pressed }) => [
-            styles.optionCard,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => router.push('/rede-apoio')}
-        >
-          <View style={styles.optionIcon}>
-            <Ionicons
-              name="people-outline"
-              size={28}
-              color={colors.primary}
-            />
-          </View>
-
-          <View style={styles.optionContent}>
-            <Text style={styles.optionTitle}>
-              Rede de apoio
-            </Text>
-
-            <Text style={styles.optionDescription}>
-              Encontre serviços de orientação e acolhimento.
-            </Text>
-          </View>
-
-          <Ionicons
-            name="chevron-forward"
-            size={24}
-            color={colors.primary}
-          />
-        </Pressable>
       </ScrollView>
     </View>
   );
@@ -264,233 +300,193 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  content: {
-    paddingHorizontal: 26,
-    paddingTop: 45,
+  scrollContent: {
+    alignItems: 'center',
     paddingBottom: 60,
+  },
+
+  content: {
+    width: '100%',
   },
 
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
+
     alignSelf: 'flex-start',
-    marginBottom: 30,
+
+    marginBottom: 24,
   },
 
   backText: {
     color: colors.primary,
-    fontSize: 17,
+
+    fontSize: 16,
     fontWeight: '600',
   },
 
-  headerIcon: {
-    width: 78,
-    height: 78,
-    borderRadius: 39,
-
-    backgroundColor: colors.primary,
-
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    marginBottom: 22,
+  warningIcon: {
+    marginBottom: 12,
   },
 
   title: {
     color: colors.primary,
 
-    fontSize: 36,
-    lineHeight: 43,
-
     fontWeight: '700',
 
-    marginBottom: 12,
+    lineHeight: 43,
+
+    maxWidth: 650,
+
+    marginBottom: 10,
   },
 
   subtitle: {
     color: colors.text,
 
-    fontSize: 18,
-    lineHeight: 27,
+    lineHeight: 26,
 
-    marginBottom: 30,
+    maxWidth: 650,
+
+    marginBottom: 24,
   },
 
   emergencyCard: {
-    backgroundColor: colors.primary,
+    width: '100%',
+
+    maxWidth: 700,
+
+    alignSelf: 'center',
+
+    backgroundColor: '#B4495A',
 
     borderRadius: 28,
 
-    paddingHorizontal: 24,
-    paddingVertical: 30,
-
     alignItems: 'center',
+  },
+
+  emergencyLabel: {
+    color: '#FBECEE',
+
+    fontSize: 13,
+    fontWeight: '700',
+
+    letterSpacing: 2,
+
+    marginTop: 10,
+  },
+
+  number: {
+    color: colors.white,
+
+    fontWeight: '800',
+
+    marginVertical: 3,
+  },
+
+  police: {
+    color: colors.white,
+
+    fontSize: 20,
+    fontWeight: '700',
+
+    marginBottom: 12,
+  },
+
+  emergencyDescription: {
+    color: '#FBECEE',
+
+    fontSize: 15,
+    lineHeight: 22,
+
+    textAlign: 'center',
+
+    maxWidth: 440,
 
     marginBottom: 20,
   },
 
-  cardIcon: {
-    width: 64,
-    height: 64,
-
-    borderRadius: 32,
-
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    marginBottom: 18,
-  },
-
-  emergencyLabel: {
-    color: colors.lightPink,
-
-    fontSize: 14,
-    fontWeight: '700',
-
-    letterSpacing: 2,
-  },
-
-  emergencyNumber: {
-    color: colors.white,
-
-    fontSize: 64,
-    lineHeight: 72,
-
-    fontWeight: '800',
-
-    marginTop: 5,
-  },
-
-  emergencyDescription: {
-    color: colors.white,
-
-    fontSize: 21,
-    fontWeight: '700',
-
-    marginBottom: 15,
-  },
-
-  emergencyExplanation: {
-    color: '#F4EDEF',
-
-    fontSize: 16,
-    lineHeight: 23,
-
-    textAlign: 'center',
-
-    marginBottom: 25,
-  },
-
   callButton: {
-    width: '100%',
-    minHeight: 58,
+    minHeight: 54,
+
+    paddingHorizontal: 25,
 
     backgroundColor: colors.white,
 
-    borderRadius: 30,
+    borderRadius: 27,
 
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
 
-    gap: 10,
+    gap: 8,
   },
 
   callButtonText: {
-    color: colors.primary,
+    color: '#B4495A',
 
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
   },
 
-  buttonPressed: {
-    opacity: 0.75,
-    transform: [
-      {
-        scale: 0.98,
-      },
-    ],
-  },
+  notice: {
+    maxWidth: 700,
 
-  warningBox: {
-    borderWidth: 1.5,
-    borderColor: colors.pink,
+    alignSelf: 'center',
 
-    borderRadius: 20,
+    marginTop: 18,
 
-    padding: 17,
+    borderWidth: 1,
+    borderColor: '#D9CDD0',
+
+    borderRadius: 18,
+
+    padding: 15,
 
     flexDirection: 'row',
     alignItems: 'flex-start',
 
-    gap: 11,
-
-    marginBottom: 35,
+    gap: 10,
   },
 
-  warningText: {
+  noticeText: {
     flex: 1,
 
     color: colors.text,
 
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 13,
+    lineHeight: 20,
   },
 
   sectionTitle: {
     color: colors.primary,
 
-    fontSize: 25,
+    fontSize: 22,
     fontWeight: '700',
 
-    marginBottom: 8,
+    marginTop: 32,
+    marginBottom: 15,
   },
 
-  sectionDescription: {
-    color: colors.text,
+  options: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
 
-    fontSize: 16,
-    lineHeight: 23,
+    justifyContent: 'space-between',
 
-    marginBottom: 20,
+    gap: 12,
   },
 
   optionCard: {
-    minHeight: 88,
+    minHeight: 150,
 
     backgroundColor: colors.white,
 
     borderWidth: 1,
     borderColor: '#E3DADC',
 
-    borderRadius: 22,
+    borderRadius: 20,
 
-    padding: 15,
-
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    marginBottom: 14,
-  },
-
-  optionIcon: {
-    width: 58,
-    height: 58,
-
-    borderRadius: 29,
-
-    backgroundColor: colors.lightPink,
-
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    marginRight: 13,
-  },
-
-  optionContent: {
-    flex: 1,
+    padding: 17,
   },
 
   optionTitle: {
@@ -499,13 +495,14 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
 
-    marginBottom: 4,
+    marginTop: 10,
+    marginBottom: 5,
   },
 
-  optionDescription: {
+  optionText: {
     color: colors.text,
 
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 19,
   },
 });
