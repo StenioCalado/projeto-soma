@@ -1,56 +1,1160 @@
-# Welcome to your Expo app 👋
+# 🦋 Projeto SOMA
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Segurança • Orientação • Monitoramento • Apoio**
 
-## Get started
+O **Projeto SOMA** é uma plataforma digital desenvolvida com foco na orientação e no apoio a mulheres em situação de violência doméstica.
 
-1. Install dependencies
+A proposta do projeto é facilitar o acesso a informações, canais oficiais de atendimento e serviços da rede de proteção, utilizando uma interface simples, discreta, acessível e responsiva.
 
-   ```bash
-   npm install
-   ```
+> Este projeto está sendo desenvolvido como um MVP acadêmico.
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## 📱 Sobre o projeto
 
-In the output, you'll find options to open the app in a
+Mulheres em situação de violência doméstica podem enfrentar dificuldades para identificar o tipo de violência sofrida, compreender seus direitos ou saber qual serviço procurar.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+O SOMA busca reduzir essas barreiras oferecendo uma experiência centralizada de orientação.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+A plataforma permite:
 
-## Get a fresh project
+- conhecer diferentes tipos de violência;
+- identificar sinais de situações abusivas;
+- consultar canais oficiais de atendimento;
+- acessar rapidamente opções de emergência;
+- visualizar serviços da rede de apoio;
+- consultar conteúdos educativos;
+- acessar orientações sobre segurança digital;
+- visualizar informações territoriais por meio do módulo de mapa;
+- utilizar o aplicativo em diferentes tamanhos de tela.
 
-When you're ready, run:
+O SOMA **não recebe, registra ou armazena denúncias**.
+
+Quando necessário, a plataforma direciona o usuário para canais e serviços oficiais.
+
+---
+
+# 🎯 Objetivo
+
+Criar uma plataforma mobile e web que permita orientar mulheres em situação de violência doméstica de forma:
+
+- simples;
+- segura;
+- acessível;
+- discreta;
+- responsiva;
+- centralizada.
+
+O objetivo é reduzir a dificuldade de encontrar informações e facilitar o acesso à rede oficial de proteção.
+
+---
+
+# 🌎 ODS relacionadas
+
+O projeto está relacionado principalmente aos seguintes Objetivos de Desenvolvimento Sustentável:
+
+### ODS 5 — Igualdade de Gênero
+
+Promover a igualdade de gênero e contribuir para o enfrentamento da violência contra mulheres.
+
+### ODS 16 — Paz, Justiça e Instituições Eficazes
+
+Facilitar o acesso a instituições e serviços públicos de proteção e justiça.
+
+### ODS 10 — Redução das Desigualdades
+
+A acessibilidade e a simplificação das informações também buscam reduzir barreiras de acesso aos serviços públicos.
+
+---
+
+# 🛠️ Tecnologias utilizadas
+
+O projeto utiliza:
+
+| Tecnologia | Utilização |
+|---|---|
+| TypeScript | Linguagem principal |
+| React Native | Desenvolvimento da interface |
+| Expo | Plataforma de desenvolvimento e build |
+| Expo Router | Navegação entre telas |
+| React Native Web | Execução no navegador |
+| AsyncStorage | Persistência de preferências locais |
+| Expo Vector Icons | Ícones da interface |
+| Expo Linear Gradient | Gradientes visuais |
+| Safe Area Context | Adaptação às áreas seguras dos dispositivos |
+| EAS Build | Compilação do aplicativo Android |
+| EAS Hosting | Publicação da versão Web/PWA |
+| Git | Versionamento |
+| GitHub | Repositório e colaboração |
+
+Atualmente o projeto utiliza o **Expo SDK 57**.
+
+---
+
+# 📦 Plataformas
+
+O SOMA foi estruturado para funcionar em múltiplas plataformas.
+
+### Android
+
+Disponível através de builds geradas pelo EAS Build.
 
 ```bash
-npm run reset-project
+npx eas-cli@latest build --platform android --profile preview
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+A configuração atual gera um **APK de distribuição interna**, permitindo instalação direta em dispositivos Android.
 
-### Other setup steps
+---
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### iOS
 
-## Learn more
+Durante o desenvolvimento pode ser executado através do **Expo Go**.
 
-To learn more about developing your project with Expo, look at the following resources:
+Também é possível utilizar a versão Web/PWA instalada na Tela de Início do iPhone.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+### Web
 
-Join our community of developers creating universal apps.
+A aplicação pode ser exportada através de:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npx expo export --platform web
+```
+
+A versão web pode ser publicada utilizando:
+
+```bash
+npx eas-cli@latest deploy --prod
+```
+
+---
+
+### PWA / Web App
+
+O SOMA possui estrutura para instalação como Web App.
+
+No iPhone:
+
+```text
+Safari
+→ Compartilhar
+→ Adicionar à Tela de Início
+→ Abrir como App da Web
+```
+
+A estrutura da PWA está localizada em:
+
+```text
+public/
+├── manifest.json
+├── icon-192.png
+├── icon-512.png
+├── apple-touch-icon.png
+└── social-share.png
+```
+
+---
+
+# 🚀 Como executar o projeto
+
+## Pré-requisitos
+
+Antes de iniciar, instale:
+
+- Node.js
+- npm
+- Git
+- VS Code ou outra IDE
+- Expo Go, caso queira testar em dispositivo físico
+
+Versão utilizada durante o desenvolvimento:
+
+```text
+Node.js 22+
+```
+
+Verifique:
+
+```bash
+node --version
+```
+
+```bash
+npm --version
+```
+
+```bash
+git --version
+```
+
+---
+
+# 📥 Clonando o projeto
+
+Clone o repositório:
+
+```bash
+git clone <URL_DO_REPOSITORIO>
+```
+
+Entre na pasta:
+
+```bash
+cd soma
+```
+
+Instale as dependências:
+
+```bash
+npm install
+```
+
+---
+
+# ▶️ Executando
+
+Inicie o Expo:
+
+```bash
+npx expo start
+```
+
+O terminal exibirá um QR Code e opções de execução.
+
+---
+
+## 🌐 Web
+
+Pressione:
+
+```text
+w
+```
+
+ou execute:
+
+```bash
+npx expo start --web
+```
+
+---
+
+## 📱 Expo Go
+
+Abra o Expo Go no celular e escaneie o QR Code.
+
+Se o dispositivo não conseguir acessar o servidor pela rede local:
+
+```bash
+npx expo start --tunnel
+```
+
+Para limpar o cache:
+
+```bash
+npx expo start --clear
+```
+
+ou:
+
+```bash
+npx expo start --tunnel --clear
+```
+
+---
+
+# 📂 Estrutura do projeto
+
+Estrutura simplificada:
+
+```text
+soma/
+│
+├── assets/
+│   └── images/
+│       ├── logo-soma.png
+│       ├── icon-soma.png
+│       └── adaptive-icon-soma.png
+│
+├── public/
+│   ├── manifest.json
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   ├── apple-touch-icon.png
+│   └── social-share.png
+│
+├── src/
+│   │
+│   ├── app/
+│   │   ├── conteudo/
+│   │   │   └── [id].tsx
+│   │   │
+│   │   ├── _layout.tsx
+│   │   ├── +html.tsx
+│   │   ├── index.tsx
+│   │   ├── onboarding.tsx
+│   │   ├── home.tsx
+│   │   ├── tipos-violencia.tsx
+│   │   ├── denunciar.tsx
+│   │   ├── rede-apoio.tsx
+│   │   ├── emergencia.tsx
+│   │   ├── explorar.tsx
+│   │   ├── mapa.tsx
+│   │   ├── mais.tsx
+│   │   └── configuracoes.tsx
+│   │
+│   ├── components/
+│   │   └── HomeShortcutCard.tsx
+│   │
+│   ├── constants/
+│   │   └── theme.ts
+│   │
+│   ├── data/
+│   │   ├── conteudos.ts
+│   │   ├── canaisDenuncia.ts
+│   │   ├── servicosApoio.ts
+│   │   └── tiposViolencia.ts
+│   │
+│   └── hooks/
+│       └── useResponsiveLayout.ts
+│
+├── app.json
+├── eas.json
+├── package.json
+├── package-lock.json
+└── README.md
+```
+
+---
+
+# 🧭 Navegação
+
+A navegação é feita através do **Expo Router**.
+
+Cada arquivo dentro de:
+
+```text
+src/app/
+```
+
+representa uma rota.
+
+Exemplo:
+
+```text
+src/app/home.tsx
+```
+
+gera:
+
+```text
+/home
+```
+
+Enquanto:
+
+```text
+src/app/emergencia.tsx
+```
+
+gera:
+
+```text
+/emergencia
+```
+
+---
+
+# 📄 Rotas dinâmicas
+
+Os conteúdos educativos utilizam uma rota dinâmica.
+
+Arquivo:
+
+```text
+src/app/conteudo/[id].tsx
+```
+
+Exemplos:
+
+```text
+/conteudo/seguranca-digital
+/conteudo/medida-protetiva
+/conteudo/ajudar-outra-pessoa
+```
+
+Os conteúdos são definidos em:
+
+```text
+src/data/conteudos.ts
+```
+
+Isso evita a criação de uma página diferente para cada conteúdo.
+
+---
+
+# 📱 Telas implementadas
+
+Atualmente estão disponíveis:
+
+### Splash Screen
+
+Tela inicial com identidade visual do SOMA.
+
+Existe também uma splash nativa configurada através do:
+
+```text
+expo-splash-screen
+```
+
+Isso permite que a identidade visual seja exibida antes mesmo do carregamento completo do React Native.
+
+---
+
+### Onboarding
+
+Apresentação inicial das principais funcionalidades.
+
+Possui a opção:
+
+```text
+Não mostrar esta tela novamente
+```
+
+A preferência é armazenada localmente através de:
+
+```text
+AsyncStorage
+```
+
+Chave utilizada:
+
+```text
+@soma:hide-onboarding
+```
+
+---
+
+### Home
+
+Tela principal da aplicação.
+
+Contém atalhos para:
+
+- Tipos de Violência;
+- Como denunciar;
+- Mapa;
+- Rede de Apoio;
+- Emergência;
+- Mais.
+
+O botão **Emergência** possui destaque visual próprio.
+
+---
+
+### Tipos de Violência
+
+Apresenta informações sobre:
+
+- violência física;
+- violência psicológica;
+- violência sexual;
+- violência patrimonial;
+- violência moral;
+- violência vicária.
+
+---
+
+### Como buscar ajuda
+
+Centraliza diferentes canais de atendimento.
+
+Entre os canais demonstrados estão:
+
+- Ligue 180;
+- Polícia Militar — 190;
+- Delegacia da Mulher;
+- canais digitais de denúncia;
+- rede de apoio.
+
+O SOMA apenas direciona o usuário para esses canais.
+
+---
+
+### Emergência
+
+Tela simplificada destinada a situações de risco imediato.
+
+Permite abrir diretamente a chamada para:
+
+```text
+190
+```
+
+O SOMA não realiza despacho policial nem envia pedidos de socorro.
+
+---
+
+### Rede de Apoio
+
+Apresenta serviços de:
+
+- delegacia;
+- defensoria;
+- centros de apoio;
+- saúde;
+- acolhimento.
+
+A versão atual utiliza alguns dados demonstrativos.
+
+---
+
+### Explorar
+
+Central de conteúdos educativos.
+
+Possui:
+
+- pesquisa;
+- conteúdos por categoria;
+- navegação para artigos;
+- acesso aos canais de ajuda.
+
+---
+
+### Mais
+
+Centraliza funcionalidades secundárias do aplicativo.
+
+Contém:
+
+- segurança digital;
+- orientação para ajudar outra pessoa;
+- tipos de violência;
+- rede de apoio;
+- configurações;
+- informações sobre o SOMA;
+- informações de privacidade.
+
+---
+
+### Configurações
+
+Tela destinada às preferências do aplicativo.
+
+Atualmente implementado:
+
+- visualizar novamente o onboarding;
+- mostrar onboarding na próxima abertura;
+- limpar preferências locais.
+
+Funcionalidades previstas:
+
+- tamanho de texto;
+- alto contraste;
+- notificações discretas;
+- modo discreto.
+
+---
+
+### Mapa
+
+A versão atual contém uma implementação demonstrativa.
+
+Na Web, um mapa é apresentado através de conteúdo incorporado.
+
+No aplicativo mobile, o usuário pode abrir o mapa externo.
+
+O desenvolvimento futuro prevê substituir essa implementação pelo **Mapa de Calor do SOMA**.
+
+---
+
+# 🗺️ Mapa de Calor
+
+O mapa de calor será uma das principais funcionalidades do projeto.
+
+A proposta é utilizar **dados públicos e agregados** relacionados à violência doméstica.
+
+O mapa deverá trabalhar com informações por região, distrito ou bairro.
+
+### Princípios
+
+O mapa não deverá:
+
+- apresentar localização individual de vítimas;
+- exibir endereços específicos de ocorrências;
+- utilizar relatos de usuários como pontos públicos;
+- indicar que uma região é individualmente segura ou perigosa.
+
+A visualização deverá utilizar dados territoriais agregados.
+
+Também poderá futuramente exibir serviços da rede de apoio.
+
+---
+
+# 📐 Responsividade
+
+A aplicação possui uma estrutura de responsividade centralizada em:
+
+```text
+src/hooks/useResponsiveLayout.ts
+```
+
+Os principais breakpoints utilizados são:
+
+```text
+< 350px
+Celulares extremamente compactos
+
+< 390px
+Celulares compactos
+
+390px – 767px
+Celulares
+
+768px – 1179px
+Tablets
+
+>= 1180px
+Desktop
+```
+
+A interface utiliza principalmente:
+
+```text
+flex
+flexWrap
+width: 100%
+maxWidth
+minHeight
+useWindowDimensions
+```
+
+em vez de depender exclusivamente de dimensões fixas.
+
+---
+
+# 📱 Safe Area
+
+O projeto utiliza:
+
+```text
+react-native-safe-area-context
+```
+
+Isso permite respeitar áreas ocupadas por elementos do sistema operacional.
+
+Exemplos:
+
+### Android com navegação por botões
+
+```text
+SOMA
+─────────────
+Menu do SOMA
+─────────────
+◀   ●   ■
+```
+
+### Android com gestos
+
+```text
+SOMA
+─────────────
+Menu do SOMA
+      ─
+```
+
+### iPhone
+
+Também é respeitada a área do indicador Home.
+
+Dessa forma não é necessário detectar manualmente se o usuário utiliza gestos ou botões de navegação.
+
+---
+
+# 🎨 Identidade visual
+
+Paleta principal:
+
+```text
+Roxo principal
+#3D1E45
+
+Roxo escuro
+#28152F
+
+Rosa
+#CF879E
+
+Rosa claro
+#E8C8CA
+
+Lavanda
+#BBA8CC
+
+Fundo
+#FFFDF1
+```
+
+As cores estão centralizadas em:
+
+```text
+src/constants/theme.ts
+```
+
+---
+
+# 🦋 Identidade do aplicativo
+
+Os principais assets estão em:
+
+```text
+assets/images/
+```
+
+### Logo
+
+```text
+logo-soma.png
+```
+
+Utilizada dentro do aplicativo e na Splash Screen.
+
+### Ícone padrão
+
+```text
+icon-soma.png
+```
+
+### Adaptive Icon Android
+
+```text
+adaptive-icon-soma.png
+```
+
+O Adaptive Icon permite que launchers Android apliquem diferentes formatos ao ícone sem cortar a identidade principal.
+
+---
+
+# 💾 Persistência local
+
+Preferências simples são armazenadas utilizando:
+
+```text
+@react-native-async-storage/async-storage
+```
+
+Atualmente é utilizado principalmente para controlar a exibição do onboarding.
+
+Nenhum banco de dados foi implementado nesta etapa.
+
+---
+
+# 🗄️ Backend
+
+O MVP atual **não possui backend**.
+
+Dados utilizados nas telas são armazenados localmente em arquivos TypeScript.
+
+Exemplo:
+
+```text
+src/data/
+```
+
+Uma futura evolução poderá utilizar:
+
+```text
+Node.js
+TypeScript
+API REST
+PostgreSQL
+```
+
+caso seja necessário persistir conteúdos ou integrar fontes externas.
+
+---
+
+# 🔐 Privacidade
+
+O SOMA foi pensado para minimizar a coleta de informações sensíveis.
+
+Entre os princípios do projeto estão:
+
+- evitar armazenamento desnecessário de dados pessoais;
+- evitar armazenamento de denúncias;
+- utilizar canais oficiais;
+- reduzir rastros desnecessários;
+- priorizar segurança e discrição;
+- fornecer informações claras antes de redirecionamentos.
+
+---
+
+# ♿ Acessibilidade
+
+O projeto considera requisitos como:
+
+- linguagem simples;
+- botões com áreas de toque adequadas;
+- textos legíveis;
+- contraste;
+- navegação simplificada;
+- interface responsiva;
+- compatibilidade futura com ajustes de fonte;
+- modo de alto contraste planejado.
+
+---
+
+# 🌐 Build Web
+
+Para gerar a versão web:
+
+```bash
+npx expo export --platform web
+```
+
+O resultado será criado em:
+
+```text
+dist/
+```
+
+Para publicar através do EAS Hosting:
+
+```bash
+npx eas-cli@latest deploy --prod
+```
+
+---
+
+# 🤖 Build Android
+
+O projeto utiliza EAS Build.
+
+Arquivo:
+
+```text
+eas.json
+```
+
+Para gerar um APK de preview:
+
+```bash
+npx eas-cli@latest build --platform android --profile preview
+```
+
+Esse APK pode ser instalado diretamente em dispositivos Android.
+
+---
+
+# 📲 Atualizações
+
+Existem diferentes tipos de atualização.
+
+### Web / PWA
+
+Alterações podem ser publicadas utilizando:
+
+```bash
+npx expo export --platform web
+npx eas-cli@latest deploy --prod
+```
+
+A URL de produção permanece a mesma.
+
+### Android
+
+Mudanças que afetam o código nativo podem exigir uma nova build.
+
+```bash
+npx eas-cli@latest build --platform android --profile preview
+```
+
+O uso de **EAS Update** poderá ser configurado futuramente para atualizações compatíveis sem necessidade de gerar um novo APK.
+
+---
+
+# 🌿 Estratégia de branches
+
+A branch:
+
+```text
+main
+```
+
+deve conter a versão estável do projeto.
+
+Não desenvolver diretamente na `main`.
+
+Antes de iniciar uma funcionalidade:
+
+```bash
+git checkout main
+```
+
+Atualize:
+
+```bash
+git pull origin main
+```
+
+Crie uma branch:
+
+```bash
+git checkout -b feat/nome-da-funcionalidade
+```
+
+Exemplo:
+
+```bash
+git checkout -b feat/mapa-calor
+```
+
+---
+
+# 💾 Commit
+
+Depois de desenvolver:
+
+```bash
+git status
+```
+
+```bash
+git add .
+```
+
+```bash
+git commit -m "feat: implementa funcionalidade"
+```
+
+Primeiro push da branch:
+
+```bash
+git push -u origin feat/nome-da-funcionalidade
+```
+
+Depois abra um **Pull Request** no GitHub:
+
+```text
+feat/nome-da-funcionalidade
+              ↓
+             main
+```
+
+---
+
+# 📝 Padrão de commits
+
+Preferencialmente utilizar mensagens simples seguindo Conventional Commits.
+
+### Nova funcionalidade
+
+```bash
+git commit -m "feat: implementa mapa de calor"
+```
+
+### Correção
+
+```bash
+git commit -m "fix: corrige responsividade da home"
+```
+
+### Refatoração
+
+```bash
+git commit -m "refactor: reorganiza componentes"
+```
+
+### Documentação
+
+```bash
+git commit -m "docs: atualiza README"
+```
+
+### Estilo
+
+```bash
+git commit -m "style: ajusta espaçamento dos cards"
+```
+
+---
+
+# 🔄 Mantendo sua branch atualizada
+
+Enquanto estiver desenvolvendo, outras alterações podem entrar na `main`.
+
+Atualize primeiro:
+
+```bash
+git checkout main
+git pull origin main
+```
+
+Depois retorne à sua branch:
+
+```bash
+git checkout feat/minha-feature
+```
+
+E integre a versão atual da main conforme a estratégia definida pelo grupo.
+
+---
+
+# 🧪 Testes recomendados
+
+Antes de abrir um Pull Request, testar:
+
+### Web
+
+Viewports recomendados:
+
+```text
+320px
+360px
+390px
+430px
+768px
+1024px
+1366px
+1920px
+```
+
+### Mobile
+
+Quando possível:
+
+- Android com navegação por gestos;
+- Android com navegação por botões;
+- iPhone;
+- dispositivo com tela menor;
+- dispositivo com tela maior.
+
+### Fluxos
+
+Validar pelo menos:
+
+```text
+Splash
+→ Onboarding
+→ Home
+→ Tipos de Violência
+
+Home
+→ Como denunciar
+
+Home
+→ Emergência
+
+Home
+→ Rede de Apoio
+
+Home
+→ Explorar
+→ Conteúdo
+
+Home
+→ Mais
+→ Configurações
+
+Home
+→ Mapa
+```
+
+---
+
+# ⚠️ Dados demonstrativos
+
+Algumas informações presentes no MVP são utilizadas apenas para demonstração da experiência.
+
+Isso inclui principalmente:
+
+- serviços exibidos na Rede de Apoio;
+- localização apresentada no mapa atual;
+- conteúdos territoriais.
+
+Esses dados deverão ser substituídos ou validados antes de qualquer utilização fora do contexto do protótipo.
+
+---
+
+# 🔮 Roadmap
+
+Próximas evoluções previstas:
+
+- [ ] Implementação do mapa de calor;
+- [ ] integração com fontes públicas de dados;
+- [ ] visualização territorial por bairro/distrito;
+- [ ] exibição de serviços oficiais no mapa;
+- [ ] melhoria da rede de apoio;
+- [ ] validação de dados de atendimento;
+- [ ] modo discreto;
+- [ ] alto contraste;
+- [ ] ajuste de tamanho de texto;
+- [ ] revisão de acessibilidade;
+- [ ] melhorias de segurança digital;
+- [ ] configuração de EAS Update;
+- [ ] refinamento da PWA;
+- [ ] revisão geral de conteúdos;
+- [ ] testes com diferentes dispositivos.
+
+---
+
+# 🚨 Aviso importante
+
+O Projeto SOMA é uma plataforma de orientação.
+
+Ele **não substitui serviços policiais, jurídicos, médicos ou de emergência**.
+
+Em situações de perigo imediato, devem ser utilizados os canais oficiais de emergência.
+
+No Brasil:
+
+```text
+Polícia Militar
+190
+```
+
+Para orientação e atendimento à mulher:
+
+```text
+Ligue 180
+```
+
+---
+
+# 👥 Equipe
+
+Projeto desenvolvido como atividade acadêmica.
+
+Os integrantes da equipe podem ser adicionados nesta seção:
+
+```text
+Nome — função / área
+Nome — função / área
+Nome — função / área
+```
+
+---
+
+# 📌 Status
+
+```text
+🟢 MVP navegável
+🟢 Android
+🟢 Web
+🟢 PWA
+🟢 Responsividade inicial
+🟡 Mapa demonstrativo
+🔴 Mapa de calor em desenvolvimento
+```
+
+---
+
+# 🦋 SOMA
+
+> **Segurança, Orientação, Monitoramento e Apoio**
+
+Tecnologia utilizada como instrumento para facilitar o acesso à informação, orientação e rede de proteção.
