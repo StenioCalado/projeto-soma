@@ -5,16 +5,17 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '../components/AppText';
 
 import {
   useMemo,
   useState,
 } from 'react';
 
+import { PageNavigation } from '../components/PageNavigation';
 import { colors } from '../constants/theme';
 import { conteudos } from '../data/conteudos';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
@@ -74,22 +75,10 @@ export default function ExplorarScreen() {
             },
           ]}
         >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={26}
-              color={colors.primary}
-            />
-
-            <Text style={styles.backText}>
-              Voltar
-            </Text>
-          </Pressable>
+          <PageNavigation />
 
           <Text
+            accessibilityRole="header"
             style={[
               styles.title,
               {
@@ -131,11 +120,15 @@ export default function ExplorarScreen() {
               value={busca}
               onChangeText={setBusca}
               placeholder="Buscar assunto"
+              accessibilityLabel="Buscar assunto"
               placeholderTextColor="#918991"
             />
 
             {busca.length > 0 && (
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Limpar busca"
+                hitSlop={8}
                 onPress={() =>
                   setBusca('')
                 }
@@ -149,7 +142,7 @@ export default function ExplorarScreen() {
             )}
           </View>
 
-          <Text style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
             Informações importantes
           </Text>
 
@@ -157,6 +150,8 @@ export default function ExplorarScreen() {
             {resultados.map(
               (conteudo) => (
                 <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`${conteudo.categoria}: ${conteudo.titulo}. ${conteudo.resumo}`}
                   key={conteudo.id}
                   style={({ pressed }) => [
                     styles.card,
@@ -261,9 +256,11 @@ export default function ExplorarScreen() {
           )}
 
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Precisa de ajuda agora? Ver canais de ajuda."
             style={styles.helpCard}
             onPress={() =>
-              router.push('/denunciar')
+              router.replace('/denunciar')
             }
           >
             <View style={styles.helpContent}>
@@ -304,21 +301,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
 
-    alignSelf: 'flex-start',
-
-    marginBottom: 28,
-  },
-
-  backText: {
-    color: colors.primary,
-
-    fontSize: 16,
-    fontWeight: '600',
-  },
 
   title: {
     color: colors.primary,

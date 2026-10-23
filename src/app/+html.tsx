@@ -1,11 +1,14 @@
-import { ScrollViewStyleReset } from 'expo-router/html';
+import { ScrollViewStyleReset, useServerDocumentContext } from 'expo-router/html';
 import type { PropsWithChildren } from 'react';
 
 export default function Root({
   children,
 }: PropsWithChildren) {
+  const { headNodes, bodyNodes, htmlAttributes, bodyAttributes } =
+    useServerDocumentContext();
+
   return (
-    <html lang="pt-BR">
+    <html {...htmlAttributes} lang="pt-BR">
       <head>
         <meta charSet="utf-8" />
 
@@ -16,7 +19,7 @@ export default function Root({
 
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
 
         {/* Cor principal da interface do navegador */}
@@ -67,9 +70,13 @@ export default function Root({
         <title>Projeto SOMA</title>
 
         <ScrollViewStyleReset />
+        {headNodes}
       </head>
 
-      <body>{children}</body>
+      <body {...bodyAttributes}>
+        {children}
+        {bodyNodes}
+      </body>
     </html>
   );
 }

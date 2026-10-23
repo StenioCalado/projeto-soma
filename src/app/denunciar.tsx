@@ -2,17 +2,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 import {
-  Alert,
   Linking,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '../components/AppText';
 
+import { MapaDestaque } from '../components/MapaDestaque';
+import { PageNavigation } from '../components/PageNavigation';
 import { colors } from '../constants/theme';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+import { avisar } from '../utils/alerta';
 
 const canais = [
   {
@@ -34,13 +36,13 @@ const canais = [
     botao: 'Ligar para 190',
   },
   {
-    titulo: 'Delegacia da Mulher',
+    titulo: 'Rede de apoio',
     descricao:
-      'Consulte serviços de atendimento e unidades disponíveis.',
+      'Lista de delegacias, casas da mulher, hospitais e defensorias, com endereço e telefone.',
     icone: 'business-outline',
     acao: 'route',
     valor: '/rede-apoio',
-    botao: 'Ver rede de apoio',
+    botao: 'Ver a lista',
   },
   {
     titulo: 'Web Denúncia',
@@ -75,7 +77,7 @@ export default function DenunciarScreen() {
 
       await Linking.openURL(valor);
     } catch {
-      Alert.alert(
+      avisar(
         'Não foi possível abrir',
         'Tente novamente ou utilize o canal diretamente.'
       );
@@ -103,22 +105,10 @@ export default function DenunciarScreen() {
             },
           ]}
         >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={26}
-              color={colors.primary}
-            />
-
-            <Text style={styles.backText}>
-              Voltar
-            </Text>
-          </Pressable>
+          <PageNavigation />
 
           <Text
+            accessibilityRole="header"
             style={[
               styles.title,
               {
@@ -147,6 +137,12 @@ export default function DenunciarScreen() {
             caminho diferente. Escolha o canal
             mais adequado para o momento.
           </Text>
+
+          {/* O mapa é o caminho principal */}
+          <MapaDestaque
+            titulo="Encontre atendimento no mapa"
+            texto="Delegacias da Mulher, casas da mulher, hospitais e defensorias de São Paulo, com o telefone de cada um."
+          />
 
           <View style={styles.cards}>
             {canais.map((canal) => (
@@ -215,6 +211,8 @@ export default function DenunciarScreen() {
                 </Text>
 
                 <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`${canal.botao}: ${canal.titulo}`}
                   style={({ pressed }) => [
                     styles.cardButton,
                     pressed &&
@@ -256,6 +254,7 @@ export default function DenunciarScreen() {
           </View>
 
           <Pressable
+            accessibilityRole="button"
             style={styles.emergencyButton}
             onPress={() =>
               router.push('/emergencia')
@@ -304,21 +303,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
 
-    alignSelf: 'flex-start',
-
-    marginBottom: 28,
-  },
-
-  backText: {
-    color: colors.primary,
-
-    fontSize: 16,
-    fontWeight: '600',
-  },
 
   title: {
     color: colors.primary,

@@ -5,10 +5,11 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '../components/AppText';
 
+import { PageNavigation } from '../components/PageNavigation';
 import { colors } from '../constants/theme';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
@@ -29,6 +30,8 @@ function MenuItem({
 }: MenuItemProps) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. ${description}`}
       style={({ pressed }) => [
         styles.menuItem,
 
@@ -128,22 +131,10 @@ export default function MaisScreen() {
             },
           ]}
         >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={26}
-              color={colors.primary}
-            />
-
-            <Text style={styles.backText}>
-              Voltar
-            </Text>
-          </Pressable>
+          <PageNavigation />
 
           <Text
+            accessibilityRole="header"
             style={[
               styles.title,
               {
@@ -172,7 +163,7 @@ export default function MaisScreen() {
             o SOMA com mais segurança.
           </Text>
 
-          <Text style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
             Informações e apoio
           </Text>
 
@@ -262,7 +253,7 @@ export default function MaisScreen() {
             </View>
           </View>
 
-          <Text style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
             Aplicativo
           </Text>
 
@@ -280,7 +271,7 @@ export default function MaisScreen() {
             />
           </View>
 
-          <Text style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
             Sobre o SOMA
           </Text>
 
@@ -320,7 +311,7 @@ export default function MaisScreen() {
             </Text>
           </View>
 
-          <Text style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
             Privacidade e segurança
           </Text>
 
@@ -386,21 +377,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
 
-    alignSelf: 'flex-start',
-
-    marginBottom: 28,
-  },
-
-  backText: {
-    color: colors.primary,
-
-    fontSize: 16,
-    fontWeight: '600',
-  },
 
   title: {
     color: colors.primary,

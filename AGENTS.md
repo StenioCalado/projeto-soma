@@ -1,6 +1,6 @@
 # Expo HAS CHANGED
 
-Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
+Read the exact versioned docs at https://docs.expo.dev/versions/v58.0.0/ before writing any code.
 
 
 AGENTS.md — Projeto SOMA
@@ -16,11 +16,11 @@ Limite fundamental: o SOMA não é um canal oficial de denúncias, não recebe n
 2. Leia antes de alterar código
 1. Leia o README.md e examine os arquivos reais afetados pela tarefa.
 2. Verifique o package.json, app.json, eas.json e o tsconfig.json antes de mudar dependências, versões, build ou configuração.
-3. Expo HAS CHANGED: antes de escrever código dependente das APIs do Expo, consulte a documentação da versão efetivamente instalada. Na base examinada, o projeto usa Expo SDK 57: https://docs.expo.dev/versions/v57.0.0/. Se a versão mudar, consulte a documentação correspondente; não aplique exemplos de outras versões sem verificar compatibilidade.
+3. Expo HAS CHANGED: antes de escrever código dependente das APIs do Expo, consulte a documentação da versão efetivamente instalada. Na base examinada, o projeto usa Expo SDK 58: https://docs.expo.dev/versions/v58.0.0/. Se a versão mudar, consulte a documentação correspondente; não aplique exemplos de outras versões sem verificar compatibilidade.
 4. Considere os arquivos de dados locais e componentes existentes como fonte de verdade para nomes, tipos, rotas e padrões de implementação.
 5. Diferencie explicitamente funcionalidade implementada, protótipo/demonstração e funcionalidade planejada. Não apresente itens do roadmap como concluídos.
 3. Stack e arquitetura atual
-- TypeScript com configuração estrita, React 19, React Native, Expo SDK 57 e Expo Router.
+- TypeScript com configuração estrita, React 19, React Native, Expo SDK 58 e Expo Router.
 - React Native Web para navegadores e experiência instalável de Web App/PWA.
 - AsyncStorage apenas para pequenas preferências locais (por exemplo, onboarding); não há backend nem banco de dados implementado nesta etapa.
 - EAS Build para APK Android de pré-visualização; EAS Hosting para publicação web.
@@ -92,9 +92,9 @@ Altura < 740px	Tela baixa
 - Prefira flex, flexWrap, limites de largura e conteúdo rolável a alturas fixas que cortem botões/textos.
 - Considere tamanho de fonte do sistema e teclados; não esconda ações essenciais fora da área visível.
 - Código exclusivo de navegador (como iframe) deve estar protegido por condição de plataforma. Não use APIs DOM em código nativo sem uma alternativa.
-7. Navegação — estado atual e melhoria pendente
-Na base examinada, o src/app/_layout.tsx usa um Stack e a barra inferior Home / Explorar / Mapa / Canais está implementada dentro de src/app/home.tsx. Por isso ela desaparece em outras telas, e chamadas sucessivas a router.push() podem gerar um histórico de retorno longo. Esta deficiência ainda não está corrigida na main examinada.
-Quando a tarefa for corrigir a navegação:
+7. Navegação — estado atual
+O src/app/_layout.tsx usa um Stack e controla a barra compartilhada Home / Explorar / Mapa / Canais pelo componente BottomNavigation. A navegação principal usa router.replace(); PageNavigation oferece Voltar e Início nas telas internas. Splash e onboarding não exibem a barra. As verificações realizadas e limitações nativas estão registradas em docs/.
+Ao alterar a navegação:
 1. Centralize a barra em um layout/navegador compartilhado apropriado para o Expo Router, em vez de duplicá-la nas páginas. Pode usar um layout de tabs ou composição equivalente, conforme a arquitetura mais consistente com as rotas existentes.
 2. Mantenha a barra visível nas telas internas pertinentes, inclusive em conteúdos de detalhe, sem sobreposição do conteúdo ou de barras do sistema.
 3. Não exiba a barra na Splash Screen inicial (/) nem no onboarding (/onboarding).

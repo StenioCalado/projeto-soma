@@ -8,15 +8,13 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '../components/AppText';
 
+import { ONBOARDING_STORAGE_KEY } from '../constants/storage';
 import { colors } from '../constants/theme';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
-
-const ONBOARDING_STORAGE_KEY =
-  '@soma:hide-onboarding';
 
 const items = [
   {
@@ -107,6 +105,8 @@ export default function OnboardingScreen() {
         ]}
       >
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Pular apresentação"
           style={styles.skip}
           onPress={pular}
         >
@@ -116,6 +116,7 @@ export default function OnboardingScreen() {
         </Pressable>
 
         <Text
+          accessibilityRole="header"
           style={[
             styles.title,
             {
@@ -219,6 +220,10 @@ export default function OnboardingScreen() {
         </View>
 
         <Pressable
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: naoMostrarNovamente }}
+          aria-checked={naoMostrarNovamente}
+          accessibilityLabel="Não mostrar esta tela novamente"
           style={styles.checkboxContainer}
           onPress={() =>
             setNaoMostrarNovamente(
@@ -248,6 +253,7 @@ export default function OnboardingScreen() {
         </Pressable>
 
         <Pressable
+          accessibilityRole="button"
           style={({ pressed }) => [
             styles.button,
             pressed &&
@@ -290,7 +296,8 @@ const styles = StyleSheet.create({
   },
 
   skip: {
-    alignSelf: 'flex-end',
+    // À esquerda, para não ficar sob o botão de saída rápida (canto direito)
+    alignSelf: 'flex-start',
     paddingVertical: 8,
     marginBottom: 26,
   },

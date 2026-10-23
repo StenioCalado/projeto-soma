@@ -3,6 +3,22 @@ import { useEffect, useState } from 'react';
 import { Asset } from 'expo-asset';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import {
+  AppSafeAreaFrame,
+  AppSafeAreaProvider,
+} from '../components/AppSafeArea';
+
+import {
+  carregarEscalaTexto,
+  EscalaTextoId,
+  TextScaleProvider,
+} from '../components/AppText';
+import { BottomNavigation } from '../components/BottomNavigation';
+import { QuickExitButton } from '../components/QuickExitButton';
+import { colors } from '../constants/theme';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,9 +31,15 @@ export default function RootLayout() {
   const [appReady, setAppReady] =
     useState(false);
 
+  // Tamanho do texto salvo, lido antes da primeira tela para não "piscar".
+  const [escalaInicial, setEscalaInicial] =
+    useState<EscalaTextoId>('normal');
+
   useEffect(() => {
     async function prepareApp() {
       try {
+        setEscalaInicial(await carregarEscalaTexto());
+
         await Asset.fromModule(
           require(
             '../../assets/images/logo-soma.png'
@@ -47,10 +69,30 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <AppSafeAreaProvider>
+      <TextScaleProvider inicial={escalaInicial}>
+        <GestureHandlerRootView style={styles.root}>
+          <AppSafeAreaFrame>
+            <QuickExitButton />
+            <View style={styles.screens}>
+              <Stack screenOptions={{ headerShown: false }} />
+            </View>
+            <BottomNavigation />
+          </AppSafeAreaFrame>
+        </GestureHandlerRootView>
+      </TextScaleProvider>
+    </AppSafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+
+  screens: {
+    flex: 1,
+    minHeight: 0,
+  },
+});

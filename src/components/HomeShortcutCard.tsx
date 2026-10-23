@@ -3,10 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   Pressable,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from 'react-native';
+import { Text } from './AppText';
 
 import { colors } from '../constants/theme';
 
@@ -61,6 +61,8 @@ export function HomeShortcutCard({
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
       style={({ pressed }) => [
         styles.card,
 
