@@ -168,8 +168,10 @@ public/
 ├── icon-192.png
 ├── icon-512.png
 ├── apple-touch-icon.png
-└── social-share.png
+└── tempo.html
 ```
+
+O manifest e os metadados de `src/app/+html.tsx` dão suporte à experiência Web App. Não há service worker implementado nesta versão; instalação na tela inicial não equivale a funcionamento offline integral, e o comportamento por navegador ainda exige validação.
 
 ---
 
@@ -212,7 +214,7 @@ git --version
 Clone o repositório:
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone https://github.com/StenioCalado/projeto-soma.git soma
 ```
 
 Entre na pasta:
@@ -315,7 +317,18 @@ soma/
 │   ├── icon-192.png
 │   ├── icon-512.png
 │   ├── apple-touch-icon.png
-│   └── social-share.png
+│   └── tempo.html
+│
+├── docs/
+│   ├── arquitetura-software.md
+│   ├── integracao-zip-navegacao.md
+│   ├── migracao-sdk58.md
+│   └── publicacao-2026-10-23.md
+│
+├── scripts/
+│   ├── mapa-calor/            → preparação prévia das bases, insumos e metodologia
+│   ├── publicar-github-pages.sh
+│   └── reset-project.js
 │
 ├── src/
 │   │
@@ -341,19 +354,29 @@ soma/
 │   │   ├── HomeShortcutCard.tsx
 │   │   ├── QuickExitButton.tsx
 │   │   ├── AppText.tsx
+│   │   ├── AppSafeArea.tsx
+│   │   ├── AppSafeArea.web.tsx
 │   │   ├── BottomNavigation.tsx
+│   │   ├── PageNavigation.tsx
 │   │   ├── MapaDestaque.tsx
 │   │   ├── ServicosNoMapa.tsx
 │   │   ├── MapaInterativo.tsx
+│   │   ├── MapPath.tsx
+│   │   ├── MapPath.web.tsx
+│   │   ├── MapPath.types.ts
 │   │   ├── MapaCalorSP.tsx
-│   │   └── MapaCalorCapital.tsx
+│   │   ├── MapaCalorCapital.tsx
+│   │   ├── MapaCalorDelegacias.tsx
+│   │   └── PainelDelegacias.tsx
 │   │
 │   ├── constants/
 │   │   ├── storage.ts
 │   │   └── theme.ts
 │   │
 │   ├── data/
+│   │   ├── canaisDenuncia.ts
 │   │   ├── conteudos.ts
+│   │   ├── servicosApoio.ts
 │   │   ├── tiposViolencia.ts
 │   │   └── mapaCalor/          → dados do mapa e dos serviços da Rede de Apoio
 │   │
@@ -361,17 +384,24 @@ soma/
 │   │   └── useResponsiveLayout.ts
 │   │
 │   └── utils/
+│       ├── abrirLink.ts        → abre links externos e trata falhas
 │       ├── alerta.ts           → avisos que funcionam também na web
 │       ├── areaDoPonto.ts
 │       ├── quickExit.ts
-│       └── voltar.ts           → botão Voltar (vai para a Home sem histórico)
+│       └── voltar.ts           → retorno contextual; Home quando não há tela anterior
 │
+├── app.config.js
 ├── app.json
 ├── eas.json
+├── eslint.config.js
 ├── package.json
 ├── package-lock.json
+├── tsconfig.json
+├── AGENTS.md
 └── README.md
 ```
+
+Os componentes de mapa, navegação, escala de texto e áreas seguras acima já estão integrados. `src/utils/voltar.ts` usa `router.back()` quando `router.canGoBack()` é verdadeiro; caso contrário, usa `router.replace('/home')`. O botão **Início** de `PageNavigation` vai diretamente à Home.
 
 ---
 
@@ -379,13 +409,13 @@ soma/
 
 A navegação é feita através do **Expo Router**.
 
-Cada arquivo dentro de:
+Os arquivos de tela dentro de:
 
 ```text
 src/app/
 ```
 
-representa uma rota.
+definem rotas. Há arquivos especiais: `_layout.tsx` compõe o layout compartilhado e `+html.tsx` define o documento HTML da web; eles não são telas de navegação.
 
 Exemplo:
 
@@ -552,7 +582,7 @@ O SOMA não realiza despacho policial nem envia pedidos de socorro.
 
 Botão **Sair**, fixo no canto superior direito de todas as telas (exceto a splash).
 
-Serve para esconder o SOMA imediatamente caso outra pessoa se aproxime.
+Busca reduzir a exposição visual do SOMA caso outra pessoa se aproxime; não garante ocultação total nem remoção de rastros.
 
 Ao ser acionado, o SOMA é substituído por uma página neutra de previsão do tempo:
 
@@ -606,7 +636,7 @@ Lista os serviços da **cidade de São Paulo**, com os mesmos dados que aparecem
 - hospitais de referência para violência sexual;
 - Defensoria Pública (incluindo o NUDEM).
 
-Cada serviço mostra endereço, horário e telefone, com os botões **Ligar** e **Ver no mapa** (o mapa abre aproximado no serviço escolhido). A tela tem busca por nome, bairro ou rua, filtros por tipo e o botão **Mostrar mais**.
+Cada serviço mostra endereço, horário e telefone, com os botões **Ligar** e **Ver no mapa**. Quando o serviço tem coordenadas cadastradas, o mapa abre aproximado no ponto escolhido; serviços sem coordenadas não geram marcador. A tela tem busca por nome, bairro ou rua, filtros por tipo e o botão **Mostrar mais**.
 
 Fontes: Prefeitura de São Paulo (SMDHC) e Defensoria Pública do Estado de São Paulo, consultadas em setembro e outubro de 2026. As posições no mapa são aproximadas (OpenStreetMap), e a Casa da Mulher Maria de Lourdes Rodrigues está sem posição porque a fonte não trouxe uma localização.
 
@@ -618,8 +648,8 @@ Central de conteúdos educativos.
 
 Possui:
 
-- pesquisa;
-- conteúdos por categoria;
+- pesquisa por título, resumo ou categoria;
+- cartões com identificação da categoria (sem filtro separado por categoria);
 - navegação para artigos;
 - acesso aos canais de ajuda.
 
@@ -676,6 +706,8 @@ Também mantém o atalho para buscar Delegacias da Mulher no Google Maps e o ace
 
 A tela tem dois mapas, escolhidos no topo: **Cidade de São Paulo** (o principal, aberto por padrão) e **Estado de SP**. Os dois usam apenas **dados públicos e agregados** e o mesmo componente de mapa (`MapaInterativo`).
 
+As fontes públicas são obtidas e processadas previamente pelos procedimentos de `scripts/mapa-calor/`; os resultados são distribuídos em `src/data/mapaCalor/` e consultados localmente. Não há integração estatística em tempo real, sincronização automática com SSP/Sinesp ou backend próprio. A atualização dessas bases depende de nova preparação dos dados e distribuição do aplicativo/site. A consulta meteorológica da página neutra de saída rápida é uma requisição externa separada, sem relação com os indicadores do mapa.
+
 ## Estado de SP
 
 Mostra as **vítimas de feminicídio por município do Estado de São Paulo, de 2019 a 2023**.
@@ -718,7 +750,8 @@ Na aba **Cidade de São Paulo**, o botão **Relatório por área** mostra os dad
 
 - busca por bairro, distrito, estação de metrô ou trem, parque, estádio, hospital, universidade ou número da delegacia, com nomes alternativos (por exemplo, "estádio do Palmeiras" acha o Nubank Parque, antigo Allianz Parque); um distrito aponta para a área que cobre a maior parte dele;
 - botão **Usar minha localização**: o app descobre a área no próprio aparelho, sem enviar nem salvar a localização;
-- **ícones dos serviços no mapa**, com os mesmos ícones da Rede de Apoio: Delegacias da Mulher, centros de referência (Casa da Mulher Brasileira, Casas da Mulher e CDCMs), hospitais de referência para violência sexual e unidades da Defensoria Pública. Os ícones aparecem quando o mapa é aproximado ou depois de uma busca (com um pino vermelho no lugar buscado); tocar em um ícone mostra endereço, horário e telefone. Abaixo do mapa, o filtro **Mostrar no mapa** liga e desliga cada tipo (com a quantidade de cada um) e tem a opção de mostrar ou esconder todos. O pino vermelho também entra na legenda ("Lugar buscado: nome" ou "Sua localização"), a etiqueta da área se afasta do pino para não cobri-lo e tocar no pino mostra o nome do lugar e a área de delegacia em que ele fica. Também valem para o mapa por distrito;
+- **ícones dos serviços no mapa**, com os mesmos ícones da Rede de Apoio: Delegacias da Mulher, centros de referência (Casa da Mulher Brasileira, Casas da Mulher e CDCMs), hospitais de referência para violência sexual e unidades da Defensoria Pública. Os ícones aparecem quando o mapa é aproximado; tocar em um ícone mostra endereço, horário e telefone. O filtro **Mostrar no mapa** liga e desliga cada tipo (com a quantidade de cada um) e permite mostrar ou esconder todos. Marcadores, filtros e cartões de serviços também estão implementados no mapa por distrito por meio de `ServicosNoMapa.tsx`;
+- **pino vermelho do lugar buscado ou da localização solicitada**, no relatório por área: entra na legenda ("Lugar buscado: nome" ou "Sua localização"), e tocar nele mostra o nome do lugar e sua área de delegacia. A etiqueta da área se afasta do pino para não cobri-lo. A busca de lugares e o botão de localização pertencem a `PainelDelegacias`; a busca do mapa por distrito é pelo nome do distrito;
 - mapa das áreas, colorido pelo número de mulheres vítimas em 2025;
 - relatório da área: **total de mulheres vítimas e crimes por tipo** (ameaça, lesão corporal, injúria, perseguição, descumprimento de medida protetiva etc.), **evolução** de 2024 a 2026 e **comparação com a média** das 93 áreas;
 - **onde buscar atendimento perto dali**: os três serviços mais próximos (Delegacias da Mulher, Casa da Mulher Brasileira, Casas da Mulher, CDCMs), com endereço, horário e telefone, além dos serviços 24 horas, da Defensoria Pública e dos telefones 180 e 190;
@@ -772,13 +805,13 @@ O mapa não:
 
 Os nomes das áreas não ficam escritos sobre o mapa: aparecem só na etiqueta, ao tocar. A etiqueta tem um botão **×** para fechá-la sem fechar o relatório; ela volta ao tocar de novo em uma área. Vale para o mapa do estado e para os da cidade.
 
-### Limitações e próximos passos
+### Limitações dos indicadores e recursos existentes
 
 - Estado: na base do Sinesp, os registros de estupro de SP não têm município, por isso o mapa do estado mostra apenas feminicídio.
 - Cidade: o indicador do Mapa da Desigualdade junta todos os tipos de violência em um único número; a separação por tipo está no relatório por área (dados da SSP).
 - Cidade: 33,5% das ocorrências usadas pela fonte não tinham localização e ficaram de fora.
 - Relatório por área: feminicídio e estupro não vêm por delegacia na base da SSP; aparecem só como totais da cidade.
-- Também poderá exibir os serviços da rede de apoio.
+- A exibição de serviços da rede de apoio já existe nos mapas da capital, com marcadores, filtros por categoria e cartões (`ServicosNoMapa.tsx`). A conferência periódica de telefones, horários e posições continua pendente; o recurso não constitui atendimento em tempo real.
 
 ---
 
@@ -826,13 +859,13 @@ em vez de depender exclusivamente de dimensões fixas.
 
 # 📱 Safe Area
 
-O projeto utiliza:
+Nas plataformas nativas, `AppSafeArea.tsx` utiliza:
 
 ```text
 react-native-safe-area-context
 ```
 
-Isso permite respeitar áreas ocupadas por elementos do sistema operacional.
+Na web, `AppSafeArea.web.tsx` usa CSS `env(safe-area-inset-*)`, em conjunto com `viewport-fit=cover` no HTML. Essas implementações reservam espaço para as áreas do sistema; os cenários abaixo ainda precisam de validação detalhada em aparelhos físicos.
 
 Exemplos:
 
@@ -857,7 +890,7 @@ Menu do SOMA
 
 ### iPhone
 
-Também é respeitada a área do indicador Home.
+O layout nativo usa o inset inferior para acomodar a área do indicador Home; a validação detalhada por dispositivo permanece pendente.
 
 Dessa forma não é necessário detectar manualmente se o usuário utiliza gestos ou botões de navegação.
 
@@ -967,7 +1000,7 @@ API REST
 PostgreSQL
 ```
 
-caso seja necessário persistir conteúdos ou integrar fontes externas.
+caso seja necessário oferecer persistência remota ou consulta dinâmica por API própria. Isso é uma possibilidade futura, distinta do processamento prévio de fontes públicas já existente.
 
 ---
 
@@ -997,9 +1030,8 @@ O projeto considera requisitos como:
 - navegação simplificada;
 - interface responsiva;
 - papéis e rótulos para leitores de tela (`accessibilityRole` e `accessibilityLabel`) nos botões, links, títulos, caixa de seleção e campos de busca das telas;
-- compatibilidade futura com ajustes de fonte;
-- tamanho do texto ajustável em Configurações (Normal, Grande e Muito grande);
-- estado de seleção exposto com `aria-selected`, `aria-checked` e `aria-disabled`, porque o React Native Web não repassa o `accessibilityState` para a web;
+- três escalas já implementadas em `AppText.tsx`: Normal (1×), Grande (1,15×) e Muito grande (1,3×), selecionáveis em Configurações e persistidas localmente; o `TextScaleProvider` aplica a escolha aos textos que usam esse componente;
+- estados acessíveis declarados com `accessibilityState` e atributos como `aria-selected`, `aria-checked` e `aria-disabled` nos controles correspondentes;
 - modo de alto contraste planejado.
 
 Ainda falta testar com leitores de tela reais (TalkBack e VoiceOver).
@@ -1066,6 +1098,8 @@ A URL de produção permanece a mesma.
 ### Android
 
 Mudanças que afetam o código nativo podem exigir uma nova build.
+
+Não há EAS Update configurado nesta versão. A distribuição de alterações de JavaScript ou dos dados incorporados para um APK já instalado também depende da geração e instalação de um APK atualizado; publicar o site não atualiza automaticamente o aplicativo Android.
 
 ```bash
 npx eas-cli@latest build --platform android --profile preview
@@ -1288,27 +1322,39 @@ Mesmo assim, o SOMA continua sendo um protótipo acadêmico. Antes de qualquer u
 
 # 🔮 Roadmap
 
-Próximas evoluções previstas:
+### Funcionalidades implementadas
 
-- [x] Implementação do mapa de calor;
-- [x] integração com fontes públicas de dados;
-- [x] visualização territorial por distrito (cidade de São Paulo);
-- [x] serviços oficiais próximos no relatório por área;
-- [x] melhoria da rede de apoio (serviços oficiais, busca, filtros e ligação);
-- [x] mapa detalhado de São Paulo como caminho principal;
-- [x] conteúdos educativos ampliados, com fontes oficiais;
-- [x] SAMU (192) na tela de Emergência;
-- [ ] validação de dados de atendimento (confirmar telefones e horários);
-- [ ] modo discreto;
-- [ ] alto contraste;
-- [x] ajuste de tamanho de texto;
-- [x] papéis e rótulos de acessibilidade nas telas;
-- [ ] revisão de acessibilidade com leitores de tela reais;
-- [ ] melhorias de segurança digital;
-- [ ] configuração de EAS Update;
-- [ ] refinamento da PWA;
-- [ ] revisão geral de conteúdos;
-- [ ] testes com diferentes dispositivos.
+Os itens abaixo estão presentes no código; isso não significa homologação de todos os cenários de uso.
+
+- [x] Mapas de feminicídios por município, indicadores por distrito e relatório por área de delegacia (`MapaInterativo`, `MapaCalorSP`, `MapaCalorCapital`, `MapaCalorDelegacias` e `PainelDelegacias`);
+- [x] preparação prévia de fontes públicas em lote e consulta dos arquivos agregados locais, sem atualização estatística em tempo real;
+- [x] serviços nos mapas da capital com marcadores, filtros e cartões (`ServicosNoMapa`), além da lista de serviços próximos no relatório;
+- [x] Rede de Apoio com busca, filtros, ligação e acesso ao mapa;
+- [x] mapa da capital como visão inicial e atalhos `MapaDestaque` na Home, em Canais e na Rede de Apoio;
+- [x] conteúdos educativos com fontes e pesquisa por título, resumo ou categoria;
+- [x] acesso ao discador para 190, 192 (SAMU) e 180;
+- [x] navegação inferior global, seção ativa, Voltar contextual e Início direto;
+- [x] três escalas de texto com persistência local, rótulos/papéis acessíveis e áreas seguras por plataforma;
+- [x] saída rápida e página neutra na web, com as limitações de histórico descritas acima;
+- [x] preferências de onboarding e limpeza das preferências locais.
+
+### Validações pendentes
+
+- [ ] Conferir periodicamente telefones, horários, endereços e posições dos serviços;
+- [ ] validar os conteúdos com profissionais da área e revisar suas fontes;
+- [ ] testar TalkBack e VoiceOver, contraste, legibilidade e tamanho de fonte do sistema;
+- [ ] validar o APK em Android físico, incluindo Voltar, gestos/três botões, permissões e falhas de localização;
+- [ ] ampliar os testes em diferentes dispositivos e navegadores, incluindo instalação e limites offline do Web App;
+- [ ] avaliar saída rápida, histórico, multitarefa, falhas de rede e valores pequenos nos datasets distribuídos.
+
+### Evoluções futuras
+
+- [ ] Modo discreto (além da saída rápida já implementada);
+- [ ] modo de alto contraste;
+- [ ] notificações discretas, caso o recurso seja aprovado — não há envio de notificações nesta versão;
+- [ ] melhorias de segurança digital além do conteúdo orientativo existente;
+- [ ] configuração de EAS Update para atualizações compatíveis;
+- [ ] refinamento da PWA/Web App, sem prometer funcionamento offline integral na implementação atual.
 
 ---
 
@@ -1351,17 +1397,24 @@ Nome — função / área
 
 # 📌 Status
 
-```text
-🟢 MVP navegável
-🟢 Android
-🟢 Web
-🟢 PWA
-🟢 Responsividade inicial
-🟢 Mapa de calor (estado e cidade de São Paulo)
-🟢 Rede de apoio com serviços oficiais
-```
+### Recursos implementados no código
 
-> **Nota de versão:** o código da `main` após o PR #3 (commit `f243aeda`) inclui os mapas, a navegação persistente e a migração para Expo SDK 58. Os símbolos de status acima descrevem recursos presentes ou canais de distribuição já usados; **não equivalem a certificação de segurança, homologação completa de acessibilidade ou aprovação de todos os cenários em dispositivos físicos**. A baseline e as pendências técnicas estão descritas em `docs/arquitetura-software.md`.
+MVP navegável em Expo SDK 58, mapas do estado e da capital, relatório por área, serviços no mapa e Rede de Apoio, conteúdos educativos, navegação persistente, saída rápida, três escalas de texto e layout responsivo. Manifest e metadados para Web App estão presentes; isso não comprova suporte offline integral.
+
+### Artefatos e execuções registrados
+
+| Evidência histórica | Situação documentada | Limite |
+| --- | --- | --- |
+| Site web no EAS Hosting | Publicação em 23/10/2026 | Não comprova novo deploy após o merge do PR #3 |
+| APK Android de preview | Build concluída em 23/10/2026 | Geração do APK não equivale a validação em aparelho físico |
+| Expo Go no iPhone | Usuário confirmou funcionamento com túnel | Não equivale a build iOS distribuída nem homologação integral |
+| Web exportada e fluxos no navegador | Verificações registradas em `docs/` | Não cobrem todos os dispositivos, navegadores ou recursos de acessibilidade |
+
+### Validação ainda pendente
+
+Permanecem as verificações detalhadas de Android físico, leitores de tela, permissões, saída rápida, instalação Web App e revisão dos dados de atendimento e conteúdos, conforme o roadmap. Nenhuma plataforma é classificada aqui como integralmente homologada.
+
+> **Nota de versão:** a baseline funcional é o merge do PR #3 (`f243aeda`). Recursos presentes, artefatos gerados e validações são evidências distintas. Este PR documental não executa nova build, deploy ou certificação de segurança/acessibilidade. Consulte [`docs/arquitetura-software.md`](docs/arquitetura-software.md) e os relatórios históricos em `docs/`.
 
 ---
 
