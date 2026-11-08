@@ -91,6 +91,20 @@ O projeto utiliza:
 
 Atualmente o projeto utiliza o **Expo SDK 58**.
 
+## 🏛️ Arquitetura de software
+
+Na versão atual, o SOMA é classificado, **quanto ao gênero arquitetural**, como um **Sistema Interativo**, pois sua operação é orientada às ações das pessoas usuárias e ao feedback de interface.
+
+Seu **estilo arquitetural predominante** é **monolítico no frontend**: a interface, a navegação e o processamento local são distribuídos como uma aplicação multiplataforma, sem backend de negócio ou banco de dados remoto próprios. A implementação é **modularizada por componentes reutilizáveis**, com separação lógica de responsabilidades entre telas/rotas, componentes, hooks/utilitários e dados locais. Essa organização **não constitui uma arquitetura em camadas estrita**, porque há acessos diretos aos dados e parte da lógica reside em telas e componentes.
+
+O preparo das bases estatísticas utiliza um **pipeline ETL em lote inspirado em Pipe-and-Filter**: scripts geram arquivos agregados para o aplicativo consumir localmente. Esse pipeline de construção de dados não é um microsserviço e não funciona continuamente durante a utilização.
+
+**Drivers arquiteturais prioritários:** privacidade e segurança da usuária, usabilidade, acessibilidade, compatibilidade Android/iOS/web, confiabilidade das informações territoriais, desempenho de interação e baixo custo de operação.
+
+**Decisões e limites relevantes:** o SOMA não recebe denúncias nem aciona instituições automaticamente; os mapas apresentam estatísticas públicas agregadas e não preveem risco individual; a saída rápida reduz a exposição visual, mas não apaga o histórico do navegador nem garante ocultação total.
+
+A análise completa de gênero, estilo, componentes, diagramas, drivers, requisitos não funcionais, trade-offs, riscos, validação e decisões arquiteturais está em [`docs/arquitetura-software.md`](docs/arquitetura-software.md), tomando como baseline o merge do **PR #3** em **08/11/2026** (commit `f243aeda`).
+
 ---
 
 # 📦 Plataformas
@@ -241,32 +255,21 @@ ou execute:
 npx expo start --web
 ```
 
-### Site público (GitHub Pages do fork)
+### Publicação web principal — EAS Hosting
 
-A versão web também fica publicada em **https://akathigas.github.io/projeto-soma/** (por exemplo, `/projeto-soma/onboarding` e `/projeto-soma/mapa`). Para atualizar depois de uma mudança:
+A versão web principal do projeto SOMA é publicada pelo **EAS Hosting** em:
 
-```bash
-bash scripts/publicar-github-pages.sh
-```
+**https://projetosoma.expo.app**
 
-O script:
+Os comandos de exportação e publicação estão descritos na seção **Build Web** mais abaixo. Publicar alterações em produção exige autorização explícita da equipe; realizar um merge no GitHub, por si só, não equivale a executar um novo deploy.
 
-- gera o site com `SOMA_BASE_URL=/projeto-soma`, que o `app.config.js` transforma em `experiments.baseUrl` (sem a variável, a configuração é a mesma do `app.json`);
-- ajusta os links do manifest e do ícone do iPhone para o subcaminho;
-- cria o `.nojekyll`, para o GitHub servir a pasta `_expo`, e o `404.html`;
-- envia o resultado para a branch `gh-pages`, que só tem os arquivos do site.
+### GitHub Pages — alternativa de publicação (histórico do fork)
 
-Na primeira vez, é preciso ligar o site no GitHub: **Settings → Pages → Build and deployment → Deploy from a branch → `gh-pages` / `(root)` → Save**.
+O repositório mantém `scripts/publicar-github-pages.sh` e a configuração opcional `SOMA_BASE_URL` em `app.config.js` para exportação em subcaminhos. Esse mecanismo foi incorporado a partir do trabalho realizado em um fork de colaboração e **não representa a hospedagem web principal** do projeto.
 
-Para publicar no endereço próprio **https://projeto-soma.github.io/** (repositório `projeto-soma/projeto-soma.github.io`, site na raiz do domínio):
+A URL histórica `https://akathigas.github.io/projeto-soma/` pertence ao fork de colaboração e **não é atualizada automaticamente** por merges feitos no repositório `StenioCalado/projeto-soma`.
 
-```bash
-SOMA_BASE_URL= \
-SOMA_PAGES_REMOTO=https://github.com/projeto-soma/projeto-soma.github.io.git \
-SOMA_PAGES_BRANCH=main \
-SOMA_PAGES_URL=https://projeto-soma.github.io \
-bash scripts/publicar-github-pages.sh
-```
+**Atenção:** o script possui parâmetros próprios de destino e sua configuração padrão pode não corresponder ao repositório/domínio esperado. Antes de executá-lo, conferir a remote do Git, `SOMA_PAGES_REMOTO`, `SOMA_PAGES_BRANCH`, `SOMA_PAGES_URL` e `SOMA_BASE_URL`. Não executar esse script como parte de um ajuste documental, nem publicar sem autorização.
 
 ---
 
@@ -732,6 +735,8 @@ O relatório **não diz se um lugar é seguro ou perigoso**: mostra boletins reg
 | Lugares da busca | OpenStreetMap (© contribuidores do OpenStreetMap, licença ODbL) |
 
 O passo a passo, os cálculos e as limitações dos dois mapas estão em `scripts/mapa-calor/README.md`.
+
+**Escopo exato da `main` após o PR #3:** o mapa estadual disponibiliza feminicídios por município de **2019 a 2023**; a capital apresenta violência contra a mulher por **96 distritos (ano-base 2024)** e relatório por **93 áreas de delegacia (2024 a agosto de 2026)**. A série adicional de violência contra a mulher por município do estado em **2023**, encontrada em outro fork (`violenciaMulherSP2023.ts`), **não está presente nesta versão oficial**. Os indicadores usam unidades estatísticas, populações de referência e metodologias diferentes; não devem ser comparados como se medissem o mesmo fenômeno.
 
 Arquivos:
 
@@ -1261,6 +1266,14 @@ Home
 
 # ⚠️ Dados e validação
 
+### Validações da implementação atual
+
+Os relatórios em `docs/integracao-zip-navegacao.md`, `docs/migracao-sdk58.md` e `docs/publicacao-2026-10-23.md` registram verificações de TypeScript, lint, exportações e fluxos no navegador, além da conclusão de uma build Android de pré-visualização e da publicação web em **23/10/2026**. Esses registros são evidências históricas do trabalho realizado e **não comprovam, por si sós, que uma nova build ou um novo deploy tenha sido executado após o merge de 08/11/2026**.
+
+A validação detalhada em dispositivos Android físicos, incluindo navegação por gestos/três botões e permissões, além de testes com TalkBack/VoiceOver, deve ser registrada separadamente quando executada. Não classificar as plataformas como homologadas integralmente apenas porque os artefatos foram gerados ou a versão web carregou.
+
+A exibição de contagens de 1 a 4 como **“menos de 5”** é uma regra de apresentação; ela **não garante** que os valores exatos tenham sido suprimidos dos arquivos de dados distribuídos. Essa limitação precisa ser considerada em avaliações de privacidade.
+
 Os serviços da Rede de Apoio e os ícones do mapa usam endereços e telefones de páginas oficiais da Prefeitura de São Paulo e da Defensoria Pública, consultadas em setembro e outubro de 2026. As posições no mapa são aproximadas.
 
 Os conteúdos educativos foram escritos a partir de fontes oficiais, que aparecem no fim de cada conteúdo.
@@ -1347,6 +1360,8 @@ Nome — função / área
 🟢 Mapa de calor (estado e cidade de São Paulo)
 🟢 Rede de apoio com serviços oficiais
 ```
+
+> **Nota de versão:** o código da `main` após o PR #3 (commit `f243aeda`) inclui os mapas, a navegação persistente e a migração para Expo SDK 58. Os símbolos de status acima descrevem recursos presentes ou canais de distribuição já usados; **não equivalem a certificação de segurança, homologação completa de acessibilidade ou aprovação de todos os cenários em dispositivos físicos**. A baseline e as pendências técnicas estão descritas em `docs/arquitetura-software.md`.
 
 ---
 
