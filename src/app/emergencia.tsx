@@ -2,17 +2,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 import {
-  Alert,
   Linking,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '../components/AppText';
 
+import { PageNavigation } from '../components/PageNavigation';
 import { colors } from '../constants/theme';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+import { avisar } from '../utils/alerta';
 
 export default function EmergenciaScreen() {
   const {
@@ -29,7 +30,7 @@ export default function EmergenciaScreen() {
         `tel:${numero}`
       );
     } catch {
-      Alert.alert(
+      avisar(
         'Não foi possível realizar a ligação',
         `Ligue diretamente para ${numero}.`
       );
@@ -57,20 +58,7 @@ export default function EmergenciaScreen() {
             },
           ]}
         >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={26}
-              color={colors.primary}
-            />
-
-            <Text style={styles.backText}>
-              Voltar
-            </Text>
-          </Pressable>
+          <PageNavigation />
 
           <View style={styles.warningIcon}>
             <Ionicons
@@ -85,6 +73,7 @@ export default function EmergenciaScreen() {
           </View>
 
           <Text
+            accessibilityRole="header"
             style={[
               styles.title,
               {
@@ -164,6 +153,8 @@ export default function EmergenciaScreen() {
             </Text>
 
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ligar para 190, Polícia Militar"
               style={styles.callButton}
               onPress={() =>
                 ligar('190')
@@ -177,6 +168,53 @@ export default function EmergenciaScreen() {
 
               <Text style={styles.callButtonText}>
                 Ligar para 190
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Urgência médica: ferimentos ou mal-estar */}
+          <View style={styles.samuCard}>
+            <View style={styles.samuHeader}>
+              <Ionicons
+                name="medkit-outline"
+                size={isCompactPhone ? 30 : 34}
+                color="#B4495A"
+              />
+
+              <View style={styles.samuText}>
+                <Text
+                  accessibilityRole="header"
+                  style={styles.samuTitle}
+                >
+                  SAMU 192
+                </Text>
+
+                <Text style={styles.samuDescription}>
+                  Urgência médica. Ligue se alguém
+                  estiver ferida ou passando mal.
+                </Text>
+              </View>
+            </View>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ligar para 192, SAMU"
+              style={({ pressed }) => [
+                styles.samuButton,
+                pressed && { opacity: 0.75 },
+              ]}
+              onPress={() =>
+                ligar('192')
+              }
+            >
+              <Ionicons
+                name="call"
+                size={19}
+                color="#B4495A"
+              />
+
+              <Text style={styles.samuButtonText}>
+                Ligar para 192
               </Text>
             </Pressable>
           </View>
@@ -196,12 +234,14 @@ export default function EmergenciaScreen() {
             </Text>
           </View>
 
-          <Text style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
             Não é uma emergência imediata?
           </Text>
 
           <View style={styles.options}>
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ligar para 180. Orientação e atendimento à mulher."
               style={[
                 styles.optionCard,
                 {
@@ -231,6 +271,8 @@ export default function EmergenciaScreen() {
             </Pressable>
 
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Canais de ajuda. Conheça outras formas de buscar atendimento."
               style={[
                 styles.optionCard,
                 {
@@ -241,7 +283,7 @@ export default function EmergenciaScreen() {
                 },
               ]}
               onPress={() =>
-                router.push('/denunciar')
+                router.replace('/denunciar')
               }
             >
               <Ionicons
@@ -260,6 +302,8 @@ export default function EmergenciaScreen() {
             </Pressable>
 
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Rede de apoio. Consulte serviços de acolhimento e orientação."
               style={[
                 styles.optionCard,
                 {
@@ -309,21 +353,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
 
-    alignSelf: 'flex-start',
-
-    marginBottom: 24,
-  },
-
-  backText: {
-    color: colors.primary,
-
-    fontSize: 16,
-    fontWeight: '600',
-  },
 
   warningIcon: {
     marginBottom: 12,
@@ -425,6 +455,76 @@ const styles = StyleSheet.create({
     color: '#B4495A',
 
     fontSize: 16,
+    fontWeight: '800',
+  },
+
+  samuCard: {
+    width: '100%',
+
+    maxWidth: 700,
+
+    alignSelf: 'center',
+
+    marginTop: 14,
+
+    backgroundColor: colors.white,
+
+    borderWidth: 1.5,
+    borderColor: '#B4495A',
+
+    borderRadius: 22,
+
+    padding: 18,
+  },
+
+  samuHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    gap: 13,
+
+    marginBottom: 14,
+  },
+
+  samuText: {
+    flex: 1,
+  },
+
+  samuTitle: {
+    color: '#B4495A',
+
+    fontSize: 22,
+    fontWeight: '800',
+
+    marginBottom: 2,
+  },
+
+  samuDescription: {
+    color: colors.text,
+
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
+  samuButton: {
+    minHeight: 50,
+
+    borderWidth: 1.5,
+    borderColor: '#B4495A',
+
+    borderRadius: 25,
+
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    gap: 8,
+  },
+
+  samuButtonText: {
+    color: '#B4495A',
+
+    fontSize: 15,
     fontWeight: '800',
   },
 

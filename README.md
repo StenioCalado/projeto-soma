@@ -81,13 +81,15 @@ O projeto utiliza:
 | AsyncStorage | Persistência de preferências locais |
 | Expo Vector Icons | Ícones da interface |
 | Expo Linear Gradient | Gradientes visuais |
+| React Native SVG | Desenho do mapa de calor |
+| Expo Location | Botão "Usar minha localização" (só no aparelho) |
 | Safe Area Context | Adaptação às áreas seguras dos dispositivos |
 | EAS Build | Compilação do aplicativo Android |
 | EAS Hosting | Publicação da versão Web/PWA |
 | Git | Versionamento |
 | GitHub | Repositório e colaboração |
 
-Atualmente o projeto utiliza o **Expo SDK 57**.
+Atualmente o projeto utiliza o **Expo SDK 58**.
 
 ---
 
@@ -239,6 +241,33 @@ ou execute:
 npx expo start --web
 ```
 
+### Site público (GitHub Pages do fork)
+
+A versão web também fica publicada em **https://akathigas.github.io/projeto-soma/** (por exemplo, `/projeto-soma/onboarding` e `/projeto-soma/mapa`). Para atualizar depois de uma mudança:
+
+```bash
+bash scripts/publicar-github-pages.sh
+```
+
+O script:
+
+- gera o site com `SOMA_BASE_URL=/projeto-soma`, que o `app.config.js` transforma em `experiments.baseUrl` (sem a variável, a configuração é a mesma do `app.json`);
+- ajusta os links do manifest e do ícone do iPhone para o subcaminho;
+- cria o `.nojekyll`, para o GitHub servir a pasta `_expo`, e o `404.html`;
+- envia o resultado para a branch `gh-pages`, que só tem os arquivos do site.
+
+Na primeira vez, é preciso ligar o site no GitHub: **Settings → Pages → Build and deployment → Deploy from a branch → `gh-pages` / `(root)` → Save**.
+
+Para publicar no endereço próprio **https://projeto-soma.github.io/** (repositório `projeto-soma/projeto-soma.github.io`, site na raiz do domínio):
+
+```bash
+SOMA_BASE_URL= \
+SOMA_PAGES_REMOTO=https://github.com/projeto-soma/projeto-soma.github.io.git \
+SOMA_PAGES_BRANCH=main \
+SOMA_PAGES_URL=https://projeto-soma.github.io \
+bash scripts/publicar-github-pages.sh
+```
+
 ---
 
 ## 📱 Expo Go
@@ -306,19 +335,33 @@ soma/
 │   │   └── configuracoes.tsx
 │   │
 │   ├── components/
-│   │   └── HomeShortcutCard.tsx
+│   │   ├── HomeShortcutCard.tsx
+│   │   ├── QuickExitButton.tsx
+│   │   ├── AppText.tsx
+│   │   ├── BottomNavigation.tsx
+│   │   ├── MapaDestaque.tsx
+│   │   ├── ServicosNoMapa.tsx
+│   │   ├── MapaInterativo.tsx
+│   │   ├── MapaCalorSP.tsx
+│   │   └── MapaCalorCapital.tsx
 │   │
 │   ├── constants/
+│   │   ├── storage.ts
 │   │   └── theme.ts
 │   │
 │   ├── data/
 │   │   ├── conteudos.ts
-│   │   ├── canaisDenuncia.ts
-│   │   ├── servicosApoio.ts
-│   │   └── tiposViolencia.ts
+│   │   ├── tiposViolencia.ts
+│   │   └── mapaCalor/          → dados do mapa e dos serviços da Rede de Apoio
 │   │
-│   └── hooks/
-│       └── useResponsiveLayout.ts
+│   ├── hooks/
+│   │   └── useResponsiveLayout.ts
+│   │
+│   └── utils/
+│       ├── alerta.ts           → avisos que funcionam também na web
+│       ├── areaDoPonto.ts
+│       ├── quickExit.ts
+│       └── voltar.ts           → botão Voltar (vai para a Home sem histórico)
 │
 ├── app.json
 ├── eas.json
@@ -393,6 +436,8 @@ src/data/conteudos.ts
 
 Isso evita a criação de uma página diferente para cada conteúdo.
 
+Cada conteúdo é escrito em **blocos** (parágrafos, subtítulos e listas) e traz a lista de **fontes** oficiais, que aparece no fim da tela. Os textos sobre direitos e procedimentos (Lei Maria da Penha, Lei 14.550/2023, Ligue 180, SAMU) foram escritos a partir de fontes consultadas em outubro de 2026. Antes de mudar um desses textos, confira a fonte de novo e peça a validação do orientador.
+
 ---
 
 # 📱 Telas implementadas
@@ -441,6 +486,8 @@ Chave utilizada:
 
 Tela principal da aplicação.
 
+No topo, logo abaixo da boas-vindas, fica o cartão em destaque **Mapa de São Paulo** (`MapaDestaque`), o caminho principal para encontrar atendimento perto de você. O mesmo cartão aparece em **Canais** e na **Rede de Apoio**.
+
 Contém atalhos para:
 
 - Tipos de Violência;
@@ -471,13 +518,12 @@ Apresenta informações sobre:
 
 Centraliza diferentes canais de atendimento.
 
-Entre os canais demonstrados estão:
+A tela começa com o cartão **Mapa de São Paulo** e reúne:
 
 - Ligue 180;
 - Polícia Militar — 190;
-- Delegacia da Mulher;
-- canais digitais de denúncia;
-- rede de apoio.
+- Rede de apoio (lista de delegacias, casas da mulher, hospitais e defensorias);
+- Web Denúncia (canal online do Estado de São Paulo).
 
 O SOMA apenas direciona o usuário para esses canais.
 
@@ -490,24 +536,76 @@ Tela simplificada destinada a situações de risco imediato.
 Permite abrir diretamente a chamada para:
 
 ```text
-190
+190   Polícia Militar (perigo imediato)
+192   SAMU (urgência médica: pessoa ferida ou passando mal)
+180   Orientação e atendimento à mulher
 ```
 
 O SOMA não realiza despacho policial nem envia pedidos de socorro.
 
 ---
 
+### Saída rápida
+
+Botão **Sair**, fixo no canto superior direito de todas as telas (exceto a splash).
+
+Serve para esconder o SOMA imediatamente caso outra pessoa se aproxime.
+
+Ao ser acionado, o SOMA é substituído por uma página neutra de previsão do tempo:
+
+| Plataforma | Comportamento |
+|---|---|
+| Web / PWA | Troca a aba atual por uma "máscara" do próprio site (`public/tempo.html`): previsão do tempo de São Paulo, sem nome, cores nem ícone do SOMA. Não abre o Google nem outra aba, e funciona também com o SOMA salvo na tela inicial |
+| Web / PWA | Atalho pelo teclado: tecla **Esc** |
+| Android | Volta o app para a Home, abre a página neutra no navegador e fecha o app |
+| iOS | Volta o app para a Home e abre a página neutra no navegador |
+
+Arquivos:
+
+```text
+src/components/QuickExitButton.tsx   → botão e atalho Esc
+src/utils/quickExit.ts               → lógica de saída e endereços neutros
+public/tempo.html                    → página "máscara" da web
+```
+
+A máscara mostra a previsão de São Paulo pela [Open-Meteo](https://open-meteo.com/) (dados públicos, sem chave); a localização da pessoa não é pedida nem enviada. Sem internet, ela mostra só "Não foi possível atualizar a previsão agora", sem números inventados. No Android e no iOS, a página neutra continua sendo a pesquisa da constante `QUICK_EXIT_URL`.
+
+Limitação: a saída rápida não apaga o histórico do navegador. Na web, a máscara substitui só a página atual: o botão "voltar" do navegador pode levar a telas do SOMA abertas antes. Orientações sobre como limpar o histórico podem ser incluídas nos conteúdos de segurança digital.
+
+---
+
+### Menu inferior
+
+Menu fixo na parte de baixo de todas as telas (exceto a splash e o onboarding), com **Home**, **Explorar**, **Mapa** e **Canais**. O item da tela atual fica destacado; os conteúdos educativos (`/conteudo/...`) destacam **Explorar**.
+
+O menu fica fora da área de rolagem: o conteúdo de cada tela rola acima dele, sem ficar escondido.
+
+A troca entre Home, Explorar, Mapa e Canais usa `router.replace()`. Tocar no item ativo dentro de um artigo também abre a página principal da seção. Artigos e telas secundárias mantêm o retorno contextual pelo botão **Voltar**; o botão **Início** abre a Home diretamente.
+
+Tipos de violência e artigos destacam Explorar; Rede de Apoio e Emergência destacam Canais; Mais e Configurações destacam Home. O layout reserva espaço para a saída rápida e respeita as áreas seguras do sistema, sem sobrepor os botões de navegação.
+
+Arquivos:
+
+```text
+src/components/BottomNavigation.tsx   → menu inferior
+src/components/PageNavigation.tsx     → Voltar e Início nas telas internas
+src/app/_layout.tsx                   → exibe o menu abaixo das telas
+```
+
+---
+
 ### Rede de Apoio
 
-Apresenta serviços de:
+Lista os serviços da **cidade de São Paulo**, com os mesmos dados que aparecem como ícones no mapa (`src/data/mapaCalor/servicosMulherSP.ts`):
 
-- delegacia;
-- defensoria;
-- centros de apoio;
-- saúde;
-- acolhimento.
+- Delegacias de Defesa da Mulher;
+- Casa da Mulher Brasileira, Casas da Mulher e Centros de Defesa e Convivência da Mulher (CDCMs);
+- hospitais de referência para violência sexual;
+- Defensoria Pública (incluindo o NUDEM).
 
-A versão atual utiliza alguns dados demonstrativos.
+Cada serviço mostra endereço, horário e telefone, com os botões **Ligar** e **Ver no mapa** (o mapa abre aproximado no serviço escolhido). A tela tem busca por nome, bairro ou rua, filtros por tipo e o botão **Mostrar mais**.
+
+Fontes: Prefeitura de São Paulo (SMDHC) e Defensoria Pública do Estado de São Paulo, consultadas em setembro e outubro de 2026. As posições no mapa são aproximadas (OpenStreetMap), e a Casa da Mulher Maria de Lourdes Rodrigues está sem posição porque a fonte não trouxe uma localização.
 
 ---
 
@@ -548,49 +646,134 @@ Atualmente implementado:
 
 - visualizar novamente o onboarding;
 - mostrar onboarding na próxima abertura;
-- limpar preferências locais.
+- **tamanho do texto** (Normal, Grande ou Muito grande), com um exemplo na própria tela;
+- limpar preferências locais (também volta o texto ao tamanho Normal).
 
-Funcionalidades previstas:
+O tamanho do texto vale para todas as telas e fica salvo só no aparelho. Para isso, as telas usam o componente `Text` de `src/components/AppText.tsx`, e não o `Text` do `react-native`. Texto novo deve importar de lá:
 
-- tamanho de texto;
-- alto contraste;
-- notificações discretas;
-- modo discreto.
+```tsx
+import { Text } from '../components/AppText';
+```
+
+Funcionalidades previstas: alto contraste, modo discreto e notificações discretas (o app ainda não envia notificações). Os itens "Em breve" foram tirados da tela e ficam no roadmap.
 
 ---
 
 ### Mapa
 
-A versão atual contém uma implementação demonstrativa.
+Tela do **Mapa de São Paulo** do SOMA (detalhes na seção abaixo). Ela abre na aba **Cidade de São Paulo**, o mapa mais detalhado, com os ícones dos serviços.
 
-Na Web, um mapa é apresentado através de conteúdo incorporado.
+Chegando pelo botão **Ver no mapa** da Rede de Apoio (`/mapa?servico=<id>`), o mapa já abre aproximado no serviço escolhido, com o cartão dele aberto.
 
-No aplicativo mobile, o usuário pode abrir o mapa externo.
-
-O desenvolvimento futuro prevê substituir essa implementação pelo **Mapa de Calor do SOMA**.
+Também mantém o atalho para buscar Delegacias da Mulher no Google Maps e o acesso à Rede de Apoio.
 
 ---
 
 # 🗺️ Mapa de Calor
 
-O mapa de calor será uma das principais funcionalidades do projeto.
+A tela tem dois mapas, escolhidos no topo: **Cidade de São Paulo** (o principal, aberto por padrão) e **Estado de SP**. Os dois usam apenas **dados públicos e agregados** e o mesmo componente de mapa (`MapaInterativo`).
 
-A proposta é utilizar **dados públicos e agregados** relacionados à violência doméstica.
+## Estado de SP
 
-O mapa deverá trabalhar com informações por região, distrito ou bairro.
+Mostra as **vítimas de feminicídio por município do Estado de São Paulo, de 2019 a 2023**.
+
+- mapa dos 645 municípios paulistas, colorido em cinco faixas;
+- dois modos: **taxa por 100 mil habitantes** (média anual) e **número de vítimas**;
+- toque em um município para ver vítimas, taxa, população e comparação com a média do estado (0,40);
+- busca de município pelo nome, com aproximação no mapa;
+- visão do estado inteiro ou da capital e região;
+- lista dos municípios com mais vítimas;
+- explicação de como ler o mapa e as fontes dos dados.
+
+| Dado | Fonte |
+|---|---|
+| Feminicídios por município | Ministério da Justiça e Segurança Pública — Sinesp VDE (via pacote BrazilCrime 0.2.1) |
+| População por município | Estimativas do Ministério da Saúde/RIPSA (DATASUS) |
+| Contornos dos municípios | Malha municipal do IBGE (simplificada) |
+
+## Cidade de São Paulo
+
+Mostra **mulheres vítimas de violência por distrito do Município de São Paulo, em 2024**, somando todos os tipos de violência registrados (física, psicológica, moral, sexual e patrimonial — de ameaça e lesão corporal a estupro e feminicídio).
+
+- mapa dos 96 distritos, colorido em cinco faixas (uma delas marca a média dos distritos, 212,78);
+- toque em um distrito para ver o nome e o coeficiente; o cartão mostra subprefeitura, coeficiente, posição entre os 96 distritos e comparação com a média;
+- busca de distrito pelo nome, com aproximação no mapa;
+- visão da cidade inteira ou do centro;
+- lista dos distritos com os maiores coeficientes;
+- notas de leitura (subnotificação, contagem pelo local do crime, ocorrências sem localização) e fontes na tela.
+
+| Dado | Fonte |
+|---|---|
+| Violência contra a mulher por distrito (ano-base 2024) | Mapa da Desigualdade 2025 — Rede Nossa São Paulo e Instituto Cidades Sustentáveis, lançado em junho de 2026 (na imprensa, "Mapa da Desigualdade 2026"). Fontes originais: SSP-SP e Fundação Seade |
+| Contornos dos distritos | Prefeitura de São Paulo — GeoSampa (simplificados) |
+
+**Cálculo (feito pela fonte):** número de mulheres vítimas de violência no distrito ÷ população feminina de 20 a 59 anos do distrito × 10 mil. As ocorrências são contadas pelo distrito onde o crime aconteceu. Os valores são os publicados, sem recálculo; o script confere a média (212,78), o menor valor (Vila Andrade, 103,35) e o maior (Sé, 772,15).
+
+### Relatório por área (Cidade de São Paulo)
+
+Na aba **Cidade de São Paulo**, o botão **Relatório por área** mostra os dados da própria SSP-SP por **área de delegacia** (93 áreas que cobrem a cidade inteira), de janeiro de 2024 a agosto de 2026.
+
+- busca por bairro, distrito, estação de metrô ou trem, parque, estádio, hospital, universidade ou número da delegacia, com nomes alternativos (por exemplo, "estádio do Palmeiras" acha o Nubank Parque, antigo Allianz Parque); um distrito aponta para a área que cobre a maior parte dele;
+- botão **Usar minha localização**: o app descobre a área no próprio aparelho, sem enviar nem salvar a localização;
+- **ícones dos serviços no mapa**, com os mesmos ícones da Rede de Apoio: Delegacias da Mulher, centros de referência (Casa da Mulher Brasileira, Casas da Mulher e CDCMs), hospitais de referência para violência sexual e unidades da Defensoria Pública. Os ícones aparecem quando o mapa é aproximado ou depois de uma busca (com um pino vermelho no lugar buscado); tocar em um ícone mostra endereço, horário e telefone. Abaixo do mapa, o filtro **Mostrar no mapa** liga e desliga cada tipo (com a quantidade de cada um) e tem a opção de mostrar ou esconder todos. O pino vermelho também entra na legenda ("Lugar buscado: nome" ou "Sua localização"), a etiqueta da área se afasta do pino para não cobri-lo e tocar no pino mostra o nome do lugar e a área de delegacia em que ele fica. Também valem para o mapa por distrito;
+- mapa das áreas, colorido pelo número de mulheres vítimas em 2025;
+- relatório da área: **total de mulheres vítimas e crimes por tipo** (ameaça, lesão corporal, injúria, perseguição, descumprimento de medida protetiva etc.), **evolução** de 2024 a 2026 e **comparação com a média** das 93 áreas;
+- **onde buscar atendimento perto dali**: os três serviços mais próximos (Delegacias da Mulher, Casa da Mulher Brasileira, Casas da Mulher, CDCMs), com endereço, horário e telefone, além dos serviços 24 horas, da Defensoria Pública e dos telefones 180 e 190;
+- aviso dentro de cada relatório: estupro, feminicídio e tentativa de homicídio não aparecem na lista da área porque a SSP não publica esses números por delegacia; o aviso mostra os totais da cidade no ano escolhido;
+- notas de leitura e fontes na tela.
+
+O relatório **não diz se um lugar é seguro ou perigoso**: mostra boletins registrados, com as ressalvas (subnotificação, contagem pelo local do fato, número de vítimas e não taxa). Contagens de 1 a 4 aparecem como "menos de 5".
+
+| Dado | Fonte |
+|---|---|
+| Vítimas e tipos de crime por área | SSP-SP — base de dados Violência Contra a Mulher (dados a partir de 2024), conferida mês a mês com o painel da SSP |
+| Áreas das delegacias | CEM/USP — Distritos e Delegacias Policiais 2021 (fonte original SSP-SP) |
+| Serviços de apoio | Prefeitura de São Paulo — Secretaria Municipal de Direitos Humanos e Cidadania |
+| Lugares da busca | OpenStreetMap (© contribuidores do OpenStreetMap, licença ODbL) |
+
+O passo a passo, os cálculos e as limitações dos dois mapas estão em `scripts/mapa-calor/README.md`.
+
+Arquivos:
+
+```text
+src/app/mapa.tsx                              → tela (alternância Estado / Cidade)
+src/components/MapaInterativo.tsx            → mapa genérico: zoom, arraste, pinça e etiqueta ao tocar
+src/components/MapaCalorSP.tsx               → mapa do estado (municípios)
+src/components/MapaCalorCapital.tsx          → mapa da cidade (distritos)
+src/components/MapaCalorDelegacias.tsx       → mapa das áreas de delegacia, busca e serviços próximos
+src/components/PainelDelegacias.tsx          → relatório por área
+src/components/ServicosNoMapa.tsx            → ícones dos serviços no mapa, legenda e cartão
+src/data/mapaCalor/feminicidioSP.ts           → números por município e fontes
+src/data/mapaCalor/municipiosSP.ts            → contornos dos municípios
+src/data/mapaCalor/violenciaMulherCapital.ts  → números por distrito e fontes
+src/data/mapaCalor/distritosSP.ts             → contornos dos distritos
+src/data/mapaCalor/delegaciasSP.ts            → contornos das áreas de delegacia
+src/data/mapaCalor/violenciaDelegacias.ts     → números da SSP por área, ano e tipo
+src/data/mapaCalor/servicosMulherSP.ts        → serviços de apoio (delegacias, centros, saúde e Defensoria)
+src/data/mapaCalor/distritoParaDelegacia.ts   → distritos × áreas de delegacia
+src/data/mapaCalor/lugaresSP.ts               → lugares conhecidos para a busca (OpenStreetMap)
+src/utils/areaDoPonto.ts                      → descobre a área de delegacia de uma coordenada, no aparelho
+scripts/mapa-calor/                           → scripts, dados de origem e documentação
+```
 
 ### Princípios
 
-O mapa não deverá:
+O mapa não:
 
-- apresentar localização individual de vítimas;
-- exibir endereços específicos de ocorrências;
-- utilizar relatos de usuários como pontos públicos;
-- indicar que uma região é individualmente segura ou perigosa.
+- apresenta localização individual de vítimas;
+- exibe endereços específicos de ocorrências;
+- utiliza relatos de usuários como pontos públicos;
+- indica que uma região é individualmente segura ou perigosa.
 
-A visualização deverá utilizar dados territoriais agregados.
+Os nomes das áreas não ficam escritos sobre o mapa: aparecem só na etiqueta, ao tocar. A etiqueta tem um botão **×** para fechá-la sem fechar o relatório; ela volta ao tocar de novo em uma área. Vale para o mapa do estado e para os da cidade.
 
-Também poderá futuramente exibir serviços da rede de apoio.
+### Limitações e próximos passos
+
+- Estado: na base do Sinesp, os registros de estupro de SP não têm município, por isso o mapa do estado mostra apenas feminicídio.
+- Cidade: o indicador do Mapa da Desigualdade junta todos os tipos de violência em um único número; a separação por tipo está no relatório por área (dados da SSP).
+- Cidade: 33,5% das ocorrências usadas pela fonte não tinham localização e ficaram de fora.
+- Relatório por área: feminicídio e estupro não vêm por delegacia na base da SSP; aparecem só como totais da cidade.
+- Também poderá exibir os serviços da rede de apoio.
 
 ---
 
@@ -747,7 +930,12 @@ Preferências simples são armazenadas utilizando:
 @react-native-async-storage/async-storage
 ```
 
-Atualmente é utilizado principalmente para controlar a exibição do onboarding.
+Chaves utilizadas:
+
+```text
+@soma:hide-onboarding   exibição do onboarding
+@soma:text-scale        tamanho do texto (grande ou muito-grande; ausente = normal)
+```
 
 Nenhum banco de dados foi implementado nesta etapa.
 
@@ -803,8 +991,13 @@ O projeto considera requisitos como:
 - contraste;
 - navegação simplificada;
 - interface responsiva;
+- papéis e rótulos para leitores de tela (`accessibilityRole` e `accessibilityLabel`) nos botões, links, títulos, caixa de seleção e campos de busca das telas;
 - compatibilidade futura com ajustes de fonte;
+- tamanho do texto ajustável em Configurações (Normal, Grande e Muito grande);
+- estado de seleção exposto com `aria-selected`, `aria-checked` e `aria-disabled`, porque o React Native Web não repassa o `accessibilityState` para a web;
 - modo de alto contraste planejado.
+
+Ainda falta testar com leitores de tela reais (TalkBack e VoiceOver).
 
 ---
 
@@ -1066,17 +1259,17 @@ Home
 
 ---
 
-# ⚠️ Dados demonstrativos
+# ⚠️ Dados e validação
 
-Algumas informações presentes no MVP são utilizadas apenas para demonstração da experiência.
+Os serviços da Rede de Apoio e os ícones do mapa usam endereços e telefones de páginas oficiais da Prefeitura de São Paulo e da Defensoria Pública, consultadas em setembro e outubro de 2026. As posições no mapa são aproximadas.
 
-Isso inclui principalmente:
+Os conteúdos educativos foram escritos a partir de fontes oficiais, que aparecem no fim de cada conteúdo.
 
-- serviços exibidos na Rede de Apoio;
-- localização apresentada no mapa atual;
-- conteúdos territoriais.
+Mesmo assim, o SOMA continua sendo um protótipo acadêmico. Antes de qualquer uso fora desse contexto:
 
-Esses dados deverão ser substituídos ou validados antes de qualquer utilização fora do contexto do protótipo.
+- confirmar endereços, horários e telefones dos serviços;
+- validar os conteúdos com profissionais da área;
+- revisar tudo de novo quando as fontes forem atualizadas.
 
 ---
 
@@ -1084,16 +1277,20 @@ Esses dados deverão ser substituídos ou validados antes de qualquer utilizaç�
 
 Próximas evoluções previstas:
 
-- [ ] Implementação do mapa de calor;
-- [ ] integração com fontes públicas de dados;
-- [ ] visualização territorial por bairro/distrito;
-- [ ] exibição de serviços oficiais no mapa;
-- [ ] melhoria da rede de apoio;
-- [ ] validação de dados de atendimento;
+- [x] Implementação do mapa de calor;
+- [x] integração com fontes públicas de dados;
+- [x] visualização territorial por distrito (cidade de São Paulo);
+- [x] serviços oficiais próximos no relatório por área;
+- [x] melhoria da rede de apoio (serviços oficiais, busca, filtros e ligação);
+- [x] mapa detalhado de São Paulo como caminho principal;
+- [x] conteúdos educativos ampliados, com fontes oficiais;
+- [x] SAMU (192) na tela de Emergência;
+- [ ] validação de dados de atendimento (confirmar telefones e horários);
 - [ ] modo discreto;
 - [ ] alto contraste;
-- [ ] ajuste de tamanho de texto;
-- [ ] revisão de acessibilidade;
+- [x] ajuste de tamanho de texto;
+- [x] papéis e rótulos de acessibilidade nas telas;
+- [ ] revisão de acessibilidade com leitores de tela reais;
 - [ ] melhorias de segurança digital;
 - [ ] configuração de EAS Update;
 - [ ] refinamento da PWA;
@@ -1147,8 +1344,8 @@ Nome — função / área
 🟢 Web
 🟢 PWA
 🟢 Responsividade inicial
-🟡 Mapa demonstrativo
-🔴 Mapa de calor em desenvolvimento
+🟢 Mapa de calor (estado e cidade de São Paulo)
+🟢 Rede de apoio com serviços oficiais
 ```
 
 ---

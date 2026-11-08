@@ -5,10 +5,11 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '../components/AppText';
 
+import { PageNavigation } from '../components/PageNavigation';
 import { colors } from '../constants/theme';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
@@ -81,22 +82,10 @@ export default function TiposViolenciaScreen() {
             },
           ]}
         >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={26}
-              color={colors.primary}
-            />
-
-            <Text style={styles.backText}>
-              Voltar
-            </Text>
-          </Pressable>
+          <PageNavigation />
 
           <Text
+            accessibilityRole="header"
             style={[
               styles.title,
               {
@@ -216,9 +205,10 @@ export default function TiposViolenciaScreen() {
           </View>
 
           <Pressable
+            accessibilityRole="button"
             style={styles.helpButton}
             onPress={() =>
-              router.push('/denunciar')
+              router.replace('/denunciar')
             }
           >
             <Text style={styles.helpButtonText}>
@@ -253,21 +243,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
 
-    alignSelf: 'flex-start',
-
-    marginBottom: 28,
-  },
-
-  backText: {
-    color: colors.primary,
-
-    fontSize: 16,
-    fontWeight: '600',
-  },
 
   title: {
     color: colors.primary,

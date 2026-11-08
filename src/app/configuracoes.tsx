@@ -5,19 +5,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import {
+  ESCALAS_TEXTO,
+  Text,
+  TEXT_SCALE_STORAGE_KEY,
+  useEscalaTexto,
+} from '../components/AppText';
 
+import { ONBOARDING_STORAGE_KEY } from '../constants/storage';
+import { PageNavigation } from '../components/PageNavigation';
 import { colors } from '../constants/theme';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+import { avisar, confirmar } from '../utils/alerta';
 
-const ONBOARDING_STORAGE_KEY =
-  '@soma:hide-onboarding';
 
 export default function ConfiguracoesScreen() {
   const {
@@ -26,6 +31,8 @@ export default function ConfiguracoesScreen() {
     topPadding,
     contentMaxWidth,
   } = useResponsiveLayout();
+
+  const { escala, definirEscala } = useEscalaTexto();
 
   function mostrarApresentacaoAgora() {
     router.push('/onboarding');
@@ -37,12 +44,12 @@ export default function ConfiguracoesScreen() {
         ONBOARDING_STORAGE_KEY
       );
 
-      Alert.alert(
+      avisar(
         'Preferência atualizada',
         'A apresentação inicial voltará a aparecer quando o aplicativo for aberto novamente.'
       );
     } catch {
-      Alert.alert(
+      avisar(
         'Não foi possível alterar a preferência',
         'Tente novamente.'
       );
@@ -50,20 +57,11 @@ export default function ConfiguracoesScreen() {
   }
 
   function confirmarLimpeza() {
-    Alert.alert(
+    confirmar(
       'Limpar preferências?',
       'As preferências locais do SOMA serão restauradas para o padrão.',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Limpar',
-          style: 'destructive',
-          onPress: limparPreferencias,
-        },
-      ]
+      'Limpar',
+      limparPreferencias
     );
   }
 
@@ -71,14 +69,17 @@ export default function ConfiguracoesScreen() {
     try {
       await AsyncStorage.multiRemove([
         ONBOARDING_STORAGE_KEY,
+        TEXT_SCALE_STORAGE_KEY,
       ]);
 
-      Alert.alert(
+      await definirEscala('normal');
+
+      avisar(
         'Preferências removidas',
         'As configurações locais do SOMA foram restauradas.'
       );
     } catch {
-      Alert.alert(
+      avisar(
         'Erro',
         'Não foi possível limpar as preferências.'
       );
@@ -108,22 +109,10 @@ export default function ConfiguracoesScreen() {
             },
           ]}
         >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={26}
-              color={colors.primary}
-            />
-
-            <Text style={styles.backText}>
-              Voltar
-            </Text>
-          </Pressable>
+          <PageNavigation />
 
           <Text
+            accessibilityRole="header"
             style={[
               styles.title,
               {
@@ -151,7 +140,7 @@ export default function ConfiguracoesScreen() {
             Ajuste preferências de uso do aplicativo.
           </Text>
 
-          <Text style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
             Preferências
           </Text>
 
@@ -179,51 +168,90 @@ export default function ConfiguracoesScreen() {
             />
           </View>
 
-          <Text style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
             Acessibilidade
           </Text>
 
           <View style={styles.section}>
-            <DisabledSettingItem
-              icon="text-outline"
-              title="Tamanho do texto"
-              description="Permitir ajuste da escala dos textos do aplicativo."
-              compact={isCompactPhone}
-            />
+            <View style={styles.sizeItem}>
+              <View style={styles.sizeHeader}>
+                <View
+                  style={[
+                    styles.settingIcon,
+                    {
+                      width: isCompactPhone ? 46 : 52,
+                      height: isCompactPhone ? 46 : 52,
+                      borderRadius: isCompactPhone ? 23 : 26,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="text-outline"
+                    size={isCompactPhone ? 23 : 26}
+                    color={colors.primary}
+                  />
+                </View>
 
-            <View style={styles.divider} />
+                <View style={styles.settingContent}>
+                  <Text
+                    accessibilityRole="header"
+                    style={[
+                      styles.settingTitle,
+                      { fontSize: isCompactPhone ? 15 : 17 },
+                    ]}
+                  >
+                    Tamanho do texto
+                  </Text>
 
-            <DisabledSettingItem
-              icon="contrast-outline"
-              title="Alto contraste"
-              description="Aumentar o contraste dos elementos da interface."
-              compact={isCompactPhone}
-            />
+                  <Text style={styles.settingDescription}>
+                    Aumenta os textos do aplicativo. A escolha fica salva
+                    só neste aparelho.
+                  </Text>
+                </View>
+              </View>
+
+              <View
+                style={styles.sizeOptions}
+                accessibilityRole="radiogroup"
+                accessibilityLabel="Tamanho do texto"
+              >
+                {ESCALAS_TEXTO.map((opcao) => {
+                  const ativa = opcao.id === escala;
+
+                  return (
+                    <Pressable
+                      key={opcao.id}
+                      accessibilityRole="radio"
+                      accessibilityState={{ checked: ativa }}
+                      aria-checked={ativa}
+                      accessibilityLabel={opcao.rotulo}
+                      style={({ pressed }) => [
+                        styles.sizeOption,
+                        ativa && styles.sizeOptionActive,
+                        pressed && { opacity: 0.7 },
+                      ]}
+                      onPress={() => definirEscala(opcao.id)}
+                    >
+                      <Text
+                        style={[
+                          styles.sizeOptionText,
+                          ativa && styles.sizeOptionTextActive,
+                        ]}
+                      >
+                        {opcao.rotulo}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              <Text style={styles.sizePreview}>
+                Exemplo: Você não está sozinha. Estamos aqui para te apoiar.
+              </Text>
+            </View>
           </View>
 
-          <Text style={styles.sectionTitle}>
-            Privacidade
-          </Text>
-
-          <View style={styles.section}>
-            <DisabledSettingItem
-              icon="notifications-off-outline"
-              title="Notificações discretas"
-              description="Reduzir informações sensíveis exibidas em notificações."
-              compact={isCompactPhone}
-            />
-
-            <View style={styles.divider} />
-
-            <DisabledSettingItem
-              icon="eye-off-outline"
-              title="Modo discreto"
-              description="Configurações para reduzir a exposição do conteúdo."
-              compact={isCompactPhone}
-            />
-          </View>
-
-          <Text style={styles.sectionTitle}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
             Dados locais
           </Text>
 
@@ -286,6 +314,8 @@ function SettingItem({
 }: SettingItemProps) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. ${description}`}
       style={({ pressed }) => [
         styles.settingItem,
         pressed && {
@@ -371,84 +401,6 @@ function SettingItem({
   );
 }
 
-type DisabledSettingItemProps = {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  description: string;
-  compact?: boolean;
-};
-
-function DisabledSettingItem({
-  icon,
-  title,
-  description,
-  compact = false,
-}: DisabledSettingItemProps) {
-  return (
-    <View style={styles.disabledItem}>
-      <View
-        style={[
-          styles.disabledIcon,
-          {
-            width:
-              compact
-                ? 46
-                : 52,
-
-            height:
-              compact
-                ? 46
-                : 52,
-
-            borderRadius:
-              compact
-                ? 23
-                : 26,
-          },
-        ]}
-      >
-        <Ionicons
-          name={icon}
-          size={
-            compact
-              ? 23
-              : 26
-          }
-          color="#948A90"
-        />
-      </View>
-
-      <View style={styles.settingContent}>
-        <View style={styles.disabledTitleRow}>
-          <Text
-            style={[
-              styles.disabledTitle,
-              {
-                fontSize:
-                  compact
-                    ? 15
-                    : 17,
-              },
-            ]}
-          >
-            {title}
-          </Text>
-
-          <View style={styles.comingSoonBadge}>
-            <Text style={styles.comingSoonText}>
-              Em breve
-            </Text>
-          </View>
-        </View>
-
-        <Text style={styles.disabledDescription}>
-          {description}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -467,21 +419,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
 
-    alignSelf: 'flex-start',
-
-    marginBottom: 28,
-  },
-
-  backText: {
-    color: colors.primary,
-
-    fontSize: 16,
-    fontWeight: '600',
-  },
 
   title: {
     color: colors.primary,
@@ -574,63 +512,71 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6DEE0',
   },
 
-  disabledItem: {
-    minHeight: 92,
+  sizeItem: {
+    paddingVertical: 14,
 
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    paddingVertical: 13,
-
-    opacity: 0.75,
+    gap: 14,
   },
 
-  disabledIcon: {
-    backgroundColor: '#EDE8EA',
+  sizeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  sizeOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+
+    gap: 8,
+  },
+
+  sizeOption: {
+    flexGrow: 1,
+    flexBasis: 90,
+
+    minHeight: 46,
+
+    borderRadius: 23,
+
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+
+    backgroundColor: colors.white,
 
     alignItems: 'center',
     justifyContent: 'center',
 
-    marginRight: 12,
+    paddingHorizontal: 10,
   },
 
-  disabledTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-
-    gap: 7,
-
-    marginBottom: 4,
+  sizeOptionActive: {
+    backgroundColor: colors.primary,
   },
 
-  disabledTitle: {
-    color: '#6D656A',
-
-    fontWeight: '700',
-  },
-
-  disabledDescription: {
-    color: '#777075',
-
-    fontSize: 13,
-    lineHeight: 19,
-  },
-
-  comingSoonBadge: {
-    backgroundColor: '#E8DFE7',
-
-    borderRadius: 10,
-
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-  },
-
-  comingSoonText: {
+  sizeOptionText: {
     color: colors.primary,
 
-    fontSize: 9,
+    fontSize: 14,
     fontWeight: '700',
+
+    textAlign: 'center',
+  },
+
+  sizeOptionTextActive: {
+    color: colors.white,
+  },
+
+  sizePreview: {
+    color: colors.text,
+
+    fontSize: 15,
+    lineHeight: 22,
+
+    backgroundColor: '#F6EEF0',
+
+    borderRadius: 14,
+
+    padding: 12,
   },
 
   versionBox: {
