@@ -121,6 +121,8 @@ Os mapas representam registros estatísticos agregados, **não** ocorrência rea
 
 Contagens de 1 a 4 podem ser mostradas como **“menos de 5” na interface**, mas isso **não implica** que o número exato tenha sido removido dos arquivos TypeScript distribuídos. Essa diferença precisa ser tratada no gerenciamento do risco de exposição de dados agregados pequenos.
 
+A regra de apresentação está em `PainelDelegacias.tsx` (`MINIMO_EXIBIDO = 5`), sem aplicação global aos mapas: `MapaCalorSP.tsx` e o cartão estadual em `src/app/mapa.tsx` exibem contagens exatas. O mascaramento de um relatório não deve ser descrito como proteção geral de todas as visualizações.
+
 ## 5. Drivers arquiteturais
 
 Um *driver* é o requisito ou restrição de alto impacto que determina decisões de estrutura do software. As prioridades abaixo são uma **proposta de classificação retrospectiva** para discussão/validação com a equipe.
