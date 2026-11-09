@@ -77,6 +77,8 @@ O projeto utiliza:
 | React Native | Desenvolvimento da interface |
 | Expo | Plataforma de desenvolvimento e build |
 | Expo Router | Navegação entre telas |
+| React Native Gesture Handler | Arraste e pinça no mapa (API legada `Gesture.*`) |
+| Reanimated / Worklets | Dependências nativas de animação e execução compatíveis com o SDK |
 | React Native Web | Execução no navegador |
 | AsyncStorage | Persistência de preferências locais |
 | Expo Vector Icons | Ícones da interface |
@@ -90,6 +92,28 @@ O projeto utiliza:
 | GitHub | Repositório e colaboração |
 
 Atualmente o projeto utiliza o **Expo SDK 58**.
+
+Versões declaradas no `package.json` (intervalos de dependência, não garantia de que toda instalação resolva exatamente o mesmo patch):
+
+| Pacote | Versão declarada |
+| --- | --- |
+| `expo` | `^58.0.17` |
+| `expo-router` | `~58.0.25` |
+| `react` / `react-dom` | `19.3.0` |
+| `react-native` | `0.88.0` |
+| `typescript` | `~6.0.3` |
+| `react-native-web` | `^0.21.4` |
+| `react-native-svg` | `15.16.0` |
+| `react-native-gesture-handler` | `~3.3.0` |
+| `expo-location` | `~58.0.18` |
+| `@react-native-async-storage/async-storage` | `2.2.0` |
+| `@expo/vector-icons` | `^15.0.2` |
+| `react-native-safe-area-context` | `~5.10.1` |
+| `react-native-reanimated` | `4.7.1` |
+| `react-native-worklets` | `0.13.0` |
+| `expo-linear-gradient` | `~58.0.3` |
+
+`MapaInterativo.tsx` usa `Gesture.Pan()`, `Gesture.Pinch()` e `Gesture.Simultaneous()`: essa API legada ainda está exportada na versão 3.3.0 instalada, mas está marcada como obsoleta. A nova API 3 usa hooks; uma migração exigiria tarefa própria e validação por plataforma. Consulte o [guia oficial de migração do Gesture Handler](https://docs.swmansion.com/react-native-gesture-handler/docs/guides/upgrading-to-3/).
 
 ## 🏛️ Arquitetura de software
 
@@ -602,6 +626,8 @@ public/tempo.html                    → página "máscara" da web
 ```
 
 A máscara mostra a previsão de São Paulo pela [Open-Meteo](https://open-meteo.com/) (dados públicos, sem chave); a localização da pessoa não é pedida nem enviada. Sem internet, ela mostra só "Não foi possível atualizar a previsão agora", sem números inventados. No Android e no iOS, a página neutra continua sendo a pesquisa da constante `QUICK_EXIT_URL`.
+
+A neutralidade refere-se à aparência visível: os comentários HTML de `public/tempo.html` ainda citam SOMA e podem ser inspecionados no código-fonte. O domínio, o histórico e serviços externos também podem revelar contexto de uso; não há garantia de anonimato.
 
 Limitação: a saída rápida não apaga o histórico do navegador. Na web, a máscara substitui só a página atual: o botão "voltar" do navegador pode levar a telas do SOMA abertas antes. Orientações sobre como limpar o histórico podem ser incluídas nos conteúdos de segurança digital.
 
@@ -1307,6 +1333,8 @@ Os relatórios em `docs/integracao-zip-navegacao.md`, `docs/migracao-sdk58.md` e
 A validação detalhada em dispositivos Android físicos, incluindo navegação por gestos/três botões e permissões, além de testes com TalkBack/VoiceOver, deve ser registrada separadamente quando executada. Não classificar as plataformas como homologadas integralmente apenas porque os artefatos foram gerados ou a versão web carregou.
 
 A exibição de contagens de 1 a 4 como **“menos de 5”** é uma regra de apresentação; ela **não garante** que os valores exatos tenham sido suprimidos dos arquivos de dados distribuídos. Essa limitação precisa ser considerada em avaliações de privacidade.
+
+Essa regra está implementada em `PainelDelegacias.tsx` (`MINIMO_EXIBIDO = 5`), não de forma global: o mapa estadual (`MapaCalorSP.tsx`) e seu cartão de município mostram contagens exatas, inclusive de 1 a 4. Não interpretar o mascaramento do relatório como supressão dos números nos mapas ou nos datasets.
 
 Os serviços da Rede de Apoio e os ícones do mapa usam endereços e telefones de páginas oficiais da Prefeitura de São Paulo e da Defensoria Pública, consultadas em setembro e outubro de 2026. As posições no mapa são aproximadas.
 

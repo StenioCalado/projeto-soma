@@ -17,7 +17,7 @@ import { colors } from '../constants/theme';
 
 /**
  * Mapa coroplético genérico, usado pelo mapa do estado (municípios)
- * e pelo mapa da capital (distritos).
+ * e pelos mapas da capital (distritos e áreas de delegacia).
  *
  * - zoom com botões + / −, arraste e pinça;
  * - toque em uma área mostra uma etiqueta com o nome e um valor;
@@ -117,7 +117,8 @@ type CamadaProps = {
 /**
  * Camada com todas as áreas. Fica memorizada e as bordas não mudam
  * de espessura com o zoom (non-scaling-stroke): só é redesenhada
- * quando as cores mudam (chaveCores), não a cada movimento.
+ * quando formas, chaveCores ou onSelect mudam segundo o comparador abaixo,
+ * evitando redesenhos causados apenas pelo movimento da vista.
  */
 const Camada = memo(
   function Camada({ formas, corDe, onSelect }: CamadaProps) {
